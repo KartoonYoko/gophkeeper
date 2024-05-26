@@ -9,6 +9,8 @@ import (
 	"log"
 
 	grpcserver "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver"
+	usecaseAuth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
+	storagePostgres "github.com/KartoonYoko/gophkeeper/internal/storage/postgres"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	"go.uber.org/zap"
 )
@@ -22,11 +24,27 @@ func Run() {
 	}
 	defer logger.Log.Sync()
 
+	// storage
+	psConf := storagePostgres.Config{
+		ConnectionString: "host=localhost user=postgres password=123 dbname=gophkeeper port=5433 sslmode=disable",
+	}
+	psSt, err := storagePostgres.New(ctx, psConf)
+	if err != nil {
+		logger.Log.Error("storage init error: %s", zap.Error(err))
+		return
+	}
+	// usecases 
+	ucAConf := usecaseAuth.Config{
+		RefreshTokenDurationMinute: 60,
+	}
+	ucAuth := usecaseAuth.New(psSt, ucAConf)
+
+	// server
 	grpcConf := grpcserver.Config{
 		BootstrapAddress: ":8080",
 		SecretJWTKey:     "somesecretjwtkey",
 	}
-	grpcController := grpcserver.New(grpcConf)
+	grpcController := grpcserver.New(grpcConf, ucAuth)
 	if err := grpcController.Serve(ctx); err != nil {
 		logger.Log.Error("grpc serve error: %s", zap.Error(err))
 	}

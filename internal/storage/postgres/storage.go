@@ -19,10 +19,11 @@ func New(ctx context.Context, conf Config) (*Storage, error) {
 
 	s.conf = conf
 
-	pool, err := pgxpool.New(context.Background(), s.conf.connectionString)
+	pool, err := pgxpool.New(context.Background(), s.conf.ConnectionString)
 	if err != nil {
 		return nil, fmt.Errorf("unable to connect to database: %v", err)
 	}
+	s.pool = pool
 
 	db := stdlib.OpenDBFromPool(pool)
 	err = migrate(db)

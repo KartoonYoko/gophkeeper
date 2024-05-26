@@ -17,6 +17,7 @@ CREATE TABLE "user_refresh_token" (
 );
 
 ALTER TABLE "user_refresh_token" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+CREATE UNIQUE INDEX "users_login_idx" ON "users" ("login");
 
 -- +goose StatementEnd
 

@@ -21,9 +21,11 @@ type Controller struct {
 	pb.AuthServiceServer
 }
 
-func New(conf Config) *Controller {
+func New(conf Config, usecaseAuth AuthUsecase) *Controller {
 	c := new(Controller)
 	c.conf = conf
+
+	c.usecaseAuth = usecaseAuth
 
 	return c
 }
