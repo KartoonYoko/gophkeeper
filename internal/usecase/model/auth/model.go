@@ -1,5 +1,6 @@
 package auth
 
 type RegisterResponseModel struct {
-	UserID string
+	UserID       string
+	RefreshToken string
 }

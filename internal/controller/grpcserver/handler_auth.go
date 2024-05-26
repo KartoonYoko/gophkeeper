@@ -2,10 +2,12 @@ package grpcserver
 
 import (
 	"context"
+	"errors"
 
 	"github.com/KartoonYoko/gophkeeper/internal/controller/common"
 	pb "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
+	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -28,16 +30,27 @@ func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenR
 
 // Register добавляет новго пользователя в систему и отдаёт ему ключ для шифрования
 func (c *Controller) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	c.usecaseAuth.Register(ctx, request.Login, request.Password)
-	accessToken, err := common.BuildJWTString("1", c.conf.SecretJWTKey)
+	result, err := c.usecaseAuth.Register(ctx, request.Login, request.Password)
+	if err != nil {
+		var exsterror *ucauth.LoginAlreadyExistsError
+		if errors.As(err, &exsterror) {
+			return nil, status.Errorf(codes.AlreadyExists, "login already exists")
+		}
+
+		logger.Log.Error("failed to register user", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	accessToken, err := common.BuildJWTString(result.UserID, c.conf.SecretJWTKey)
 	if err != nil {
 		logger.Log.Error("failed to build jwt string", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
+
 	return &pb.RegisterResponse{
 		Token: &pb.Token{
 			AccessToken:  accessToken,
-			RefreshToken: "",
+			RefreshToken: result.RefreshToken,
 		},
 	}, nil
 }
