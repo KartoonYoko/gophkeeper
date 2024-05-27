@@ -74,6 +74,10 @@ func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenR
 	accessToken, err := c.buildJWTString(buildJWTStringClaims{
 		UserID: userID,
 	})
+	if err != nil {
+		logger.Log.Error("failed to build jwt string", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
 
 	return &pb.RefreshTokenResponse{
 		Token: &pb.Token{
