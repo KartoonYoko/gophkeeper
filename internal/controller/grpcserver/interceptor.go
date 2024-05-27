@@ -17,11 +17,14 @@ import (
 type InterceptorAuthKey int
 
 const (
-	keyUserID InterceptorAuthKey = iota // ключ для ID пользователя
+	ctxKeyUserID InterceptorAuthKey = iota // ключ для ID пользователя
 )
 
 // interceptorAuth проверяет наличие симметрично подписанного токена
 func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	// TODO данный перехватчик не должен вызываться на некоторых функциях, проверить это
+	// TODO провалидировать полученный токен
+	// TODO внести токен в контекст
 	var err error
 	var userID string
 
@@ -33,10 +36,7 @@ func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info 
 
 	sl := md.Get("Authorization")
 	if len(sl) == 0 {
-		userID, err = c.setAuthorizationMetadata(ctx)
-		if err != nil {
-			return nil, err
-		}
+		return nil, status.Error(codes.Unauthenticated, "not found token")
 	} else {
 		token, _ := strings.CutPrefix(sl[0], "Bearer ")
 		userID, err = common.ValidateAndGetUserID(token, c.conf.SecretJWTKey)
@@ -46,7 +46,7 @@ func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info 
 		}
 	}
 
-	ctx = context.WithValue(ctx, keyUserID, userID)
+	ctx = context.WithValue(ctx, ctxKeyUserID, userID)
 
 	return handler(ctx, req)
 }

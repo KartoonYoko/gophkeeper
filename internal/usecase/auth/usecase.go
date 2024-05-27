@@ -11,7 +11,7 @@ import (
 
 type Usecase struct {
 	storage Storager
-	conf Config
+	conf    Config
 }
 
 func New(storage Storager, config Config) *Usecase {
@@ -55,4 +55,26 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 	resModel.RefreshToken = m.Token
 
 	return resModel, nil
+}
+
+func (uc *Usecase) Logout(ctx context.Context, userID string, tokenID string) error {
+	err := uc.storage.RemoveRefreshToken(ctx, userID, tokenID)
+	if err != nil {
+		return fmt.Errorf("failed to logout: %w", err)
+	}
+
+	return nil
+}
+
+func (uc *Usecase) RefreshToken(ctx context.Context, userID string, tokenID string) (*model.RefreshTokenResponseModel, error) {
+	res, err := uc.storage.UpdateRefreshToken(ctx, userID, tokenID, uc.conf.RefreshTokenDurationMinute)
+	if err != nil {
+		return nil, fmt.Errorf("failed to refresh token: %w", err)
+	}
+
+	result := new(model.RefreshTokenResponseModel)
+	result.RefreshToken = res.Token
+	result.UserID = res.UserID
+
+	return result, nil
 }

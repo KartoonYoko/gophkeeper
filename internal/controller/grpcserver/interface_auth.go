@@ -8,7 +8,8 @@ import (
 
 // AuthUsecase usecase для ручек авторизации/аутентификации
 type AuthUsecase interface {
-	// LoginUser() (secret_key string, err error)
 	Register(ctx context.Context, login string, password string) (*model.RegisterResponseModel, error)
 	Login(ctx context.Context, login string, password string) (*model.LoginResponseModel, error)
+	Logout(ctx context.Context, userID string, tokenID string) error
+	RefreshToken(ctx context.Context, userID string, tokenID string) (*model.RefreshTokenResponseModel, error)
 }

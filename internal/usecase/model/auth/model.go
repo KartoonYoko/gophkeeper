@@ -9,3 +9,8 @@ type LoginResponseModel struct {
 	UserID       string
 	RefreshToken string
 }
+
+type RefreshTokenResponseModel struct {
+	UserID       string
+	RefreshToken string
+}

@@ -43,12 +43,44 @@ func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.L
 
 // Logout
 func (c *Controller) Logout(ctx context.Context, request *pb.LogoutRequest) (*pb.LogoutResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "uninmplemented")
+	userID, err := c.getUserIDFromContext(ctx)
+	if err != nil {
+		logger.Log.Error("can not get user ID from context", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+	err = c.usecaseAuth.Logout(ctx, userID, request.RefreshToken)
+	if err != nil {
+		logger.Log.Error("can not logout", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	return &pb.LogoutResponse{}, nil
 }
 
 // RefreshToken обновляет токен доступа
 func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "uninmplemented")
+	userID, err := c.getUserIDFromContext(ctx)
+	if err != nil {
+		logger.Log.Error("can not get user ID from context", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	res, err := c.usecaseAuth.RefreshToken(ctx, userID, request.Token.RefreshToken)
+	if err != nil {
+		logger.Log.Error("can not refresh token", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	accessToken, err := c.buildJWTString(buildJWTStringClaims{
+		UserID: userID,
+	})
+
+	return &pb.RefreshTokenResponse{
+		Token: &pb.Token{
+			AccessToken:  accessToken,
+			RefreshToken: res.RefreshToken,
+		},
+	}, nil
 }
 
 // Register добавляет новго пользователя в систему и отдаёт ему ключ для шифрования

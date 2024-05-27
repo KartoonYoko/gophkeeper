@@ -101,11 +101,10 @@ func (s *Storage) Login(
 		INSERT INTO user_refresh_token(token_id, user_id, expired_at)
 		VALUES($1, $2, $3)
 		`
-	duration := time.Minute * time.Duration(refreshTokenDurationMinute)
-	expiredAt := time.Now().UTC().Add(duration)
+	expiredAt := s.getRefreshTokeExpiredAt(refreshTokenDurationMinute)
 	_, err = tx.Exec(ctx, query, tokenID, userID, expiredAt)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create user: %w", err)
+		return nil, fmt.Errorf("unable to create refresh token: %w", err)
 	}
 
 	result := new(model.LoginResponseModel)
@@ -114,4 +113,52 @@ func (s *Storage) Login(
 	result.Token = tokenID
 
 	return result, nil
+}
+
+func (s *Storage) RemoveRefreshToken(ctx context.Context, userID string, tokenID string) error {
+	query := `DELETE FROM user_refresh_token WHERE user_id = $1 AND token_id = $2`
+	_, err := s.pool.Exec(ctx, query, userID, tokenID)
+	if err != nil {
+		return fmt.Errorf("unable to remove refresh token: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Storage) UpdateRefreshToken(
+	ctx context.Context,
+	userID string,
+	refreshToken string,
+	refreshTokenDurationMinute int) (*model.UpdateRefreshTokenResponseModel, error) {
+	query := `DELETE FROM user_refresh_token WHERE user_id = $1 AND token_id = $2`
+	_, err := s.pool.Exec(ctx, query, userID, refreshToken)
+	if err != nil {
+		return nil, fmt.Errorf("unable to remove refresh token: %w", err)
+	}
+
+	tokenID, err := common.GenerateRefreshToken()
+	if err != nil {
+		return nil, fmt.Errorf("refresh token generation error: %w", err)
+	}
+	query = `
+		INSERT INTO user_refresh_token(token_id, user_id, expired_at)
+		VALUES($1, $2, $3)
+		`
+	expiredAt := s.getRefreshTokeExpiredAt(refreshTokenDurationMinute)
+	_, err = s.pool.Exec(ctx, query, tokenID, userID, expiredAt)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create refresh token: %w", err)
+	}
+
+	result := new(model.UpdateRefreshTokenResponseModel)
+	result.UserID = userID
+	result.ExpiredAt = expiredAt
+	result.Token = tokenID
+
+	return result, nil
+}
+
+func (s *Storage) getRefreshTokeExpiredAt(refreshTokenDurationMinute int) time.Time {
+	duration := time.Minute * time.Duration(refreshTokenDurationMinute)
+	return time.Now().UTC().Add(duration)
 }

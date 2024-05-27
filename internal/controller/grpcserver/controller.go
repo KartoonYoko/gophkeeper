@@ -32,11 +32,21 @@ func New(conf Config, usecaseAuth AuthUsecase) *Controller {
 }
 
 type buildJWTStringClaims struct {
-	UserID      string
+	UserID string
 }
 
 func (c *Controller) buildJWTString(cl buildJWTStringClaims) (string, error) {
 	return common.BuildJWTString(cl.UserID, c.conf.SecretJWTKey, c.conf.JWTDurationMinute)
+}
+
+func (c *Controller) getUserIDFromContext(ctx context.Context) (string, error) {
+	somevalue := ctx.Value(ctxKeyUserID)
+	userID, ok := somevalue.(string)
+	if !ok {
+		return "", fmt.Errorf("failed to get user ID from context")
+	}
+
+	return userID, nil
 }
 
 func (c *Controller) Serve(ctx context.Context) error {

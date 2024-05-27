@@ -7,9 +7,6 @@ import (
 )
 
 type Storager interface {
-	// Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error)
-	// Logout(ctx context.Context, request *pb.LogoutRequest) (*pb.LogoutResponse, error)
-	// RefreshToken(ctx context.Context, request *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error)
 	CreateUserAndRefreshToken(
 		ctx context.Context,
 		login string,
@@ -21,4 +18,12 @@ type Storager interface {
 		login string,
 		password string,
 		refreshTokenDurationMinute int) (*smodel.LoginResponseModel, error)
+
+	UpdateRefreshToken(
+		ctx context.Context,
+		userID string,
+		refreshToken string,
+		refreshTokenDurationMinute int) (*smodel.UpdateRefreshTokenResponseModel, error)
+
+	RemoveRefreshToken(ctx context.Context, userID string, tokenID string) error
 }
