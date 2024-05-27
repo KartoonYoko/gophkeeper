@@ -7,3 +7,9 @@ type CreateUserAndRefreshTokenResponseModel struct {
 	Token     string
 	ExpiredAt time.Time
 }
+
+type LoginResponseModel struct {
+	UserID    string
+	Token     string
+	ExpiredAt time.Time
+}

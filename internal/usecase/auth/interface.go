@@ -15,4 +15,10 @@ type Storager interface {
 		login string,
 		password string,
 		refreshTokenDurationMinute int) (*smodel.CreateUserAndRefreshTokenResponseModel, error)
+
+	Login(
+		ctx context.Context,
+		login string,
+		password string,
+		refreshTokenDurationMinute int) (*smodel.LoginResponseModel, error)
 }

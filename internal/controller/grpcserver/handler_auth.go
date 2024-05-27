@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/KartoonYoko/gophkeeper/internal/controller/common"
 	pb "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
@@ -15,7 +14,31 @@ import (
 
 // Login авторизует пользователя и отдаёт ему ключ для шифрования
 func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.LoginResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "uninmplemented")
+	result, err := c.usecaseAuth.Login(ctx, request.Login, request.Password)
+	if err != nil {
+		var exsterror *ucauth.LoginOrPasswordNotFoundError
+		if errors.As(err, &exsterror) {
+			return nil, status.Errorf(codes.Unauthenticated, "login and(or) password not found")
+		}
+
+		logger.Log.Error("failed to login user", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	accessToken, err := c.buildJWTString(buildJWTStringClaims{
+		UserID: result.UserID,
+	})
+	if err != nil {
+		logger.Log.Error("failed to build jwt string", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	return &pb.LoginResponse{
+		Token: &pb.Token{
+			AccessToken:  accessToken,
+			RefreshToken: result.RefreshToken,
+		},
+	}, nil
 }
 
 // Logout
@@ -41,7 +64,9 @@ func (c *Controller) Register(ctx context.Context, request *pb.RegisterRequest) 
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	accessToken, err := common.BuildJWTString(result.UserID, c.conf.SecretJWTKey)
+	accessToken, err := c.buildJWTString(buildJWTStringClaims{
+		UserID: result.UserID,
+	})
 	if err != nil {
 		logger.Log.Error("failed to build jwt string", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")

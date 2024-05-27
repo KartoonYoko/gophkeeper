@@ -9,6 +9,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/KartoonYoko/gophkeeper/internal/controller/common"
 	pb "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	"google.golang.org/grpc"
@@ -28,6 +29,14 @@ func New(conf Config, usecaseAuth AuthUsecase) *Controller {
 	c.usecaseAuth = usecaseAuth
 
 	return c
+}
+
+type buildJWTStringClaims struct {
+	UserID      string
+}
+
+func (c *Controller) buildJWTString(cl buildJWTStringClaims) (string, error) {
+	return common.BuildJWTString(cl.UserID, c.conf.SecretJWTKey, c.conf.JWTDurationMinute)
 }
 
 func (c *Controller) Serve(ctx context.Context) error {

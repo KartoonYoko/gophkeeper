@@ -7,9 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// TOKEN_EXP — время жизни токена доступа
-const TOKEN_EXP = time.Minute * 5
-
 // Claims — структура утверждений, которая включает стандартные утверждения
 // и одно пользовательское — UserID
 type Claims struct {
@@ -18,10 +15,10 @@ type Claims struct {
 }
 
 // BuildJWTString создаёт токен и возвращает его в виде строки.
-func BuildJWTString(userID string, secretKey string) (string, error) {
+func BuildJWTString(userID string, secretKey string, tokenExpMnt int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(tokenExpMnt))),
 		},
 		UserID: userID,
 	})
