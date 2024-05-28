@@ -25,9 +25,7 @@ func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.L
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	accessToken, err := c.buildJWTString(buildJWTStringClaims{
-		UserID: result.UserID,
-	})
+	accessToken, err := c.usecaseAuth.BuildJWTString(result.UserID)
 	if err != nil {
 		logger.Log.Error("failed to build jwt string", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
@@ -71,9 +69,7 @@ func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenR
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	accessToken, err := c.buildJWTString(buildJWTStringClaims{
-		UserID: userID,
-	})
+	accessToken, err := c.usecaseAuth.BuildJWTString(res.UserID)
 	if err != nil {
 		logger.Log.Error("failed to build jwt string", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
@@ -100,9 +96,7 @@ func (c *Controller) Register(ctx context.Context, request *pb.RegisterRequest) 
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
-	accessToken, err := c.buildJWTString(buildJWTStringClaims{
-		UserID: result.UserID,
-	})
+	accessToken, err := c.usecaseAuth.BuildJWTString(result.UserID)
 	if err != nil {
 		logger.Log.Error("failed to build jwt string", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")

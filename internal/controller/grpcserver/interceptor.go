@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/KartoonYoko/gophkeeper/internal/controller/common"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -22,9 +21,15 @@ const (
 
 // interceptorAuth проверяет наличие симметрично подписанного токена
 func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	// TODO данный перехватчик не должен вызываться на некоторых функциях, проверить это
-	// TODO провалидировать полученный токен
-	// TODO внести токен в контекст
+	// данный перехватчик должен:
+	// 	- игнорировать некоторые функции
+	// 	- провалидировать полученный токен
+	// 	- внести токен в контекст
+
+	if info.FullMethod == "/proto.AuthService/Login" || info.FullMethod == "/proto.AuthService/Register" {
+		return handler(ctx, req)
+	}
+
 	var err error
 	var userID string
 
@@ -39,7 +44,7 @@ func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info 
 		return nil, status.Error(codes.Unauthenticated, "not found token")
 	} else {
 		token, _ := strings.CutPrefix(sl[0], "Bearer ")
-		userID, err = common.ValidateAndGetUserID(token, c.conf.SecretJWTKey)
+		userID, err = c.usecaseAuth.ValidateJWTString(token)
 		if err != nil {
 			logger.Log.Error("can not validate and get user ID: ", zap.Error(err))
 			return nil, status.Error(codes.Unauthenticated, "token is wrong")

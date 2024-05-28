@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	serror "github.com/KartoonYoko/gophkeeper/internal/storage/error/auth"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/common"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/auth"
 )
 
@@ -77,4 +78,19 @@ func (uc *Usecase) RefreshToken(ctx context.Context, userID string, tokenID stri
 	result.UserID = res.UserID
 
 	return result, nil
+}
+
+func (uc *Usecase) BuildJWTString(userID string) (string, error) {
+	builder := common.NewJWTStringBuilder(
+		uc.conf.SecretJWTKey,
+		common.WithUserID(userID),
+		common.WithTokeExpiredAtInMinute(uc.conf.JWTDurationMinute))
+
+	return builder.BuildJWTString()
+}
+
+func (uc *Usecase) ValidateJWTString(token string) (string, error) {
+	validator := common.NewJWTStringValidator(uc.conf.SecretJWTKey)
+
+	return validator.ValidateAndGetUserID(token)
 }

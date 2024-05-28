@@ -9,9 +9,9 @@ import (
 	"log"
 
 	grpcserver "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver"
-	usecaseAuth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
-	storagePostgres "github.com/KartoonYoko/gophkeeper/internal/storage/postgres"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
+	storagePostgres "github.com/KartoonYoko/gophkeeper/internal/storage/postgres"
+	usecaseAuth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
 	"go.uber.org/zap"
 )
 
@@ -33,16 +33,17 @@ func Run() {
 		logger.Log.Error("storage init error: %s", zap.Error(err))
 		return
 	}
-	// usecases 
+	// usecases
 	ucAConf := usecaseAuth.Config{
 		RefreshTokenDurationMinute: 60,
+		SecretJWTKey:               "somesecretjwtkey",
+		JWTDurationMinute:          5,
 	}
 	ucAuth := usecaseAuth.New(psSt, ucAConf)
 
 	// server
 	grpcConf := grpcserver.Config{
 		BootstrapAddress: ":8080",
-		SecretJWTKey:     "somesecretjwtkey",
 	}
 	grpcController := grpcserver.New(grpcConf, ucAuth)
 	if err := grpcController.Serve(ctx); err != nil {
