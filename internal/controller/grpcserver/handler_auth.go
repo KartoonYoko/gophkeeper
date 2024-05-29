@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	pb "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver/proto"
+	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
 	"go.uber.org/zap"

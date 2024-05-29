@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
+
+service StoreService {
+    // сохранить строковые данные
+    rpc SaveString (SaveStringRequest) returns (SaveStringResponse);
+    // сохранить бинарные данные
+    rpc SaveBinary (stream SaveBinaryRequest) returns (SaveBinaryResponse);
+    // получить метаинформацию о данных постранично
+    rpc GetDataMetaPage (GetDataPageRequest) returns (GetDataPageResponse);
+    // получить сами данные
+    rpc GetDataByID (GetDataByIDRequest) returns (stream GetDataByIDResponse);
+}

@@ -55,24 +55,3 @@ func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info 
 
 	return handler(ctx, req)
 }
-
-func (c *Controller) setAuthorizationMetadata(ctx context.Context) (string, error) {
-	return "", nil
-	// var err error
-	// var userID string
-
-	// userID, err = c.ucAuth.GetNewUserID(ctx)
-	// if err != nil {
-	// 	logger.Log.Error("can not get new user ID: ", zap.Error(err))
-	// 	return "", status.Error(codes.Internal, "")
-	// }
-	// jwt, err := common.BuildJWTString(userID)
-	// if err != nil {
-	// 	logger.Log.Error("can not build JWT string: ", zap.Error(err))
-	// 	return "", status.Error(codes.Internal, "")
-	// }
-	// bearerStr := fmt.Sprintf("Bearer %s", jwt)
-	// grpc.SetHeader(ctx, metadata.New(map[string]string{"Authorization": bearerStr}))
-
-	// return userID, nil
-}

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver/proto";
+option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
 
 service AuthService {
     rpc Login (LoginRequest) returns (LoginResponse);
