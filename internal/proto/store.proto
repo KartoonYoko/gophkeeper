@@ -4,6 +4,7 @@ package proto;
 
 option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
 
+// StoreService сервис для хранения приватных данных
 service StoreService {
     // сохранить строковые данные
     rpc SaveString (SaveStringRequest) returns (SaveStringResponse);
