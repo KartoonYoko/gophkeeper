@@ -34,10 +34,12 @@ func Run() {
 		return
 	}
 	// usecases
+	passwordSault := "somesault"
 	ucAConf := usecaseAuth.Config{
 		RefreshTokenDurationMinute: 60,
 		SecretJWTKey:               "somesecretjwtkey",
 		JWTDurationMinute:          5,
+		PasswordSault:              passwordSault,
 	}
 	ucAuth := usecaseAuth.New(psSt, ucAConf)
 

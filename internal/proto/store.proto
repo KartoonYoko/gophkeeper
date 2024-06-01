@@ -5,12 +5,22 @@ package proto;
 option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
 
 service StoreService {
-    // сохранить строковые данные
-    rpc SaveString (SaveStringRequest) returns (SaveStringResponse);
-    // сохранить бинарные данные
-    rpc SaveBinary (stream SaveBinaryRequest) returns (SaveBinaryResponse);
-    // получить метаинформацию о данных постранично
-    rpc GetDataMetaPage (GetDataPageRequest) returns (GetDataPageResponse);
-    // получить сами данные
-    rpc GetDataByID (GetDataByIDRequest) returns (stream GetDataByIDResponse);
+    rpc SaveData (SaveDataRequest) returns (SaveDataResponse);
+}
+
+message SaveDataRequest {
+    DataTypeEnum type = 1;
+    string description = 2;
+    bytes data = 3;
+}
+
+message SaveDataResponse {
+    int32 data_id = 1;
+}
+
+enum DataTypeEnum {
+    DATA_TYPE_CREDENTIALS = 0;
+    DATA_TYPE_TEXT = 1;
+    DATA_TYPE_BINARY = 2;
+    DATA_TYPE_BANK_CARD = 3;
 }

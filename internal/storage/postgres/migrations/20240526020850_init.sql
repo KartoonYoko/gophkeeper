@@ -1,7 +1,5 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE SCHEMA "store";
-
 CREATE TABLE "users" (
   "id" varchar PRIMARY KEY,
   "login" varchar,
@@ -23,6 +21,6 @@ CREATE UNIQUE INDEX "users_login_idx" ON "users" ("login");
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE "user_refresh_token" IF EXISTS;
-DROP TABLE "users" IF EXISTS;
+DROP TABLE IF EXISTS "user_refresh_token";
+DROP TABLE IF EXISTS "users";
 -- +goose StatementEnd

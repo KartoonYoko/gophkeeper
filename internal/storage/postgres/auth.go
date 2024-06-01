@@ -27,7 +27,7 @@ func (s *Storage) CreateUserAndRefreshToken(
 	defer tx.Commit(ctx)
 
 	userID := uuid.New().String()
-	secretKey, err := common.GenerateSecretKey()
+	secretKey, err := s.secretkeyHandler.GenerateEncryptedSecretKey()
 	if err != nil {
 		return nil, fmt.Errorf("secret key generation error: %w", err)
 	}
