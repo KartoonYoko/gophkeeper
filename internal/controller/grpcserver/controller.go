@@ -9,23 +9,27 @@ import (
 	"sync"
 	"syscall"
 
-	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
+	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"google.golang.org/grpc"
 )
 
 type Controller struct {
-	usecaseAuth AuthUsecase
+	usecaseAuth  AuthUsecase
+	usecaseStore StoreUsecase
 
 	conf Config
+
 	pb.AuthServiceServer
+	pb.StoreServiceServer
 }
 
-func New(conf Config, usecaseAuth AuthUsecase) *Controller {
+func New(conf Config, usecaseAuth AuthUsecase, usecaseStore StoreUsecase) *Controller {
 	c := new(Controller)
 	c.conf = conf
 
 	c.usecaseAuth = usecaseAuth
+	c.usecaseStore = usecaseStore
 
 	return c
 }
@@ -54,6 +58,7 @@ func (c *Controller) Serve(ctx context.Context) error {
 		c.interceptorAuth,
 	))
 	pb.RegisterAuthServiceServer(grpcServer, c)
+	pb.RegisterStoreServiceServer(grpcServer, c)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

@@ -34,11 +34,15 @@ func New(conf Config, storage Storager, fstorager FileStorager) (*Usecase, error
 	return uc, nil
 }
 
-func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestModel) error {
+func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.SaveDataResponseModel, error) {
 	// - зашифровать данные
 	// - сохранить шифрованные данные на файловом хранилище, получив ID
 	// - сохранить общую информацию в БД
 	// - в случае ошибки удалить запись в БД и данные на файловом хранилище
+	if !request.DataType.IsValid() {
+		return nil, fmt.Errorf("invalid data type %s", request.DataType)
+	}
+
 	encryptedData := uc.dataCipherHandler.Encrypt(request.Data)
 	r := &sfmodel.SaveDataRequestModel{
 		Data:   encryptedData,
@@ -46,15 +50,15 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 	}
 	sfr, err := uc.fstorage.SaveData(ctx, r)
 	if err != nil {
-		return fmt.Errorf("failed to save file: %w", err)
+		return nil, fmt.Errorf("failed to save file: %w", err)
 	}
 
 	rsd := &smodel.SaveDataRequestModel{
 		BinaryID:    sfr.ID,
 		Description: request.Description,
-		DataType:    smodel.DataType(request.DataType),
+		DataType:    request.DataType.String(),
 	}
-	_, err = uc.storage.SaveData(ctx, rsd)
+	resSaveData, err := uc.storage.SaveData(ctx, rsd)
 	if err != nil {
 		err = fmt.Errorf("failed to save data: %w", err)
 		// удаляем сохраненный файл
@@ -66,14 +70,18 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 		if removeDataErr != nil {
 			err = fmt.Errorf("failed delete not saved data: %w", err)
 		}
-		return err
+		return nil, err
 	}
-	return nil
+
+	response := &model.SaveDataResponseModel{
+		DataID: resSaveData.ID,
+	}
+	return response, nil
 }
 
 func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRequestModel) (*model.GetDataByIDResponseModel, error) {
 	// получаем метаинформацию о данных
-	srequest:= &smodel.GetDataByIDRequestModel{
+	srequest := &smodel.GetDataByIDRequestModel{
 		UserID: request.UserID,
 		ID:     request.ID,
 	}
@@ -97,9 +105,9 @@ func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRe
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt data: %w", err)
 	}
-	
+
 	response := &model.GetDataByIDResponseModel{
-		Data: encryptedData,
+		Data:        encryptedData,
 		Description: sdr.Description,
 		DataType:    sdr.DataType,
 	}

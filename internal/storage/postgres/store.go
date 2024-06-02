@@ -7,26 +7,21 @@ import (
 	model "github.com/KartoonYoko/gophkeeper/internal/storage/model/store"
 )
 
-func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.GetDataByIDRequestModel, error) {
-	if !request.DataType.IsValid() {
-		return nil, fmt.Errorf("invalid data type")
-	}
-
+func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.SaveDataResponseModel, error) {
 	query := `
 	INSERT INTO "store"."data" (user_id, binary_id, description, data_type)
 	VALUES ($1, $2, $3, $4)
 	RETURNING "id";
 	`
 
-	var id string
+	var id int
 	err := s.pool.QueryRow(ctx, query, request.UserID, request.BinaryID, request.Description, request.DataType).Scan(&id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save data: %w", err)
 	}
 
-	response := new(model.GetDataByIDRequestModel)
+	response := new(model.SaveDataResponseModel)
 	response.ID = id
-	response.UserID = request.UserID
 
 	return response, nil
 }

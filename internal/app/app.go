@@ -58,13 +58,17 @@ func Run() {
 		SecretKeySecure: "",
 		DataSecretKey: "",
 	}
-	usecaseStore.New(sConf, psSt, mstorage)
+	ucStore, err := usecaseStore.New(sConf, psSt, mstorage)
+	if err != nil {
+		logger.Log.Error("usecase store init error", zap.Error(err))
+		return
+	}
 
 	// server
 	grpcConf := grpcserver.Config{
 		BootstrapAddress: ":8080",
 	}
-	grpcController := grpcserver.New(grpcConf, ucAuth)
+	grpcController := grpcserver.New(grpcConf, ucAuth, ucStore)
 	if err := grpcController.Serve(ctx); err != nil {
 		logger.Log.Error("grpc serve error: %s", zap.Error(err))
 	}
