@@ -25,13 +25,13 @@ func New(storage Storager, config Config) *Usecase {
 
 	uc.conf = config
 	uc.storage = storage
-	uc.pswdHasher = appcommon.NewSHA256PasswordHasher(uc.conf.PasswordSault)
+	uc.pswdHasher = appcommon.NewSHA256PasswordHasher()
 
 	return uc
 }
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) (*model.RegisterResponseModel, error) {
-	hpswd, err := uc.encodePassword(password)
+	hpswd, err := uc.pswdHasher.Hash(password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash passwd: %w", err)
 	}
@@ -52,7 +52,6 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 }
 
 func (uc *Usecase) Login(ctx context.Context, login string, password string) (*model.LoginResponseModel, error) {
-	// TODO
 	// получить пользователя по логину (если не найдено, то serror.LoginOrPasswordNotFoundError)
 	// провалидировать пароль с помощью uc.pswdHasher.CheckHash()
 	// если невалидный, то вернуть ошибку serror.LoginOrPasswordNotFoundError
@@ -67,13 +66,8 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// TODO работает ли?
 	// проверка пароля
-	hpswd, err := uc.encodePassword(password)
-	if err != nil {
-		return nil, fmt.Errorf("failed to hash passwd: %w", err)
-	}
-	if !uc.pswdHasher.CheckHash(getUserResponse.Password, hpswd) {
+	if !uc.pswdHasher.CheckHash(password, getUserResponse.Password) {
 		return nil, NewLoginOrPasswordNotFoundError(login, password)
 	}
 
@@ -158,10 +152,6 @@ func (uc *Usecase) ValidateJWTString(token string) (string, error) {
 	validator := uccommon.NewJWTStringValidator(uc.conf.SecretJWTKey)
 
 	return validator.ValidateAndGetUserID(token)
-}
-
-func (uc *Usecase) encodePassword(password string) (string, error) {
-	return uc.pswdHasher.Hash(password)
 }
 
 func (uc *Usecase) refreshTokenExpiredAt() time.Time {

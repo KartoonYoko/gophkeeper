@@ -5,18 +5,17 @@ import (
 )
 
 type SHA256PasswordHasher struct {
-	salt string
 }
 
-func NewSHA256PasswordHasher(salt string) *SHA256PasswordHasher {
-	return &SHA256PasswordHasher{salt: salt}
+func NewSHA256PasswordHasher() *SHA256PasswordHasher {
+	return &SHA256PasswordHasher{}
 }
 
 func (h *SHA256PasswordHasher) Hash(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(h.salt+password), bcrypt.MinCost)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 	return string(bytes), err
 }
 
 func (h *SHA256PasswordHasher) CheckHash(password, hash string) bool {
-    return bcrypt.CompareHashAndPassword([]byte(hash), []byte(h.salt+password)) == nil
+    return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

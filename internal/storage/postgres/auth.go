@@ -74,7 +74,7 @@ func (s *Storage) GetUserByLogin(
 	ctx context.Context,
 	login string) (*model.GetUserByLoginResponseModel, error) {
 	var userID, password string
-	query := `SELECT user_id, password FROM users WHERE login = $1`
+	query := `SELECT id, password FROM users WHERE login = $1`
 	err := s.pool.QueryRow(ctx, query, login).Scan(&userID, &password)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
