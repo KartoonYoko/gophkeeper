@@ -9,10 +9,11 @@ import (
 )
 
 type Storager interface {
-	GetSecretKeyByUserID(ctx context.Context, userID string) (string, error)
-	SaveData(ctx context.Context, request storemodel.SaveDataRequestModel) (storemodel.SaveDataResponseModel, error)
+	SaveData(ctx context.Context, request storemodel.SaveDataRequestModel) (*storemodel.SaveDataResponseModel, error)
 }
 
 type FileStorager interface {
-	SaveFile(ctx context.Context, reader io.Reader) (filestoremodel.FileSaveRsponseModel, error)
+	SaveData(ctx context.Context, reader io.Reader) (filestoremodel.SaveDataResponseModel, error)
+	GetDataByID(ctx context.Context, request filestoremodel.GetDataByIDRequestModel) (*filestoremodel.GetDataByIDResponseModel, error)
+	RemoveDataByID(ctx context.Context, request filestoremodel.RemoveDataByIDRequestModel) error
 }

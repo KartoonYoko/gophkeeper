@@ -43,9 +43,8 @@ func NewDataCipherHandler(key string) (*DataCipherHandler, error) {
 	return h, nil
 }
 
-func (h *DataCipherHandler) Encrypt(secretkey string) (encryptedname string, err error) {
-	dst := h.aesgcm.Seal(nil, h.nonce, []byte(secretkey), nil)
-	return hex.EncodeToString(dst), nil
+func (h *DataCipherHandler) Encrypt(data []byte) []byte {
+	return h.aesgcm.Seal(nil, h.nonce, data, nil)
 }
 
 func (h *DataCipherHandler) Decrypt(encrypted string) (encryptedname string, err error) {
@@ -61,4 +60,3 @@ func (h *DataCipherHandler) Decrypt(encrypted string) (encryptedname string, err
 
 	return string(dst), nil
 }
-

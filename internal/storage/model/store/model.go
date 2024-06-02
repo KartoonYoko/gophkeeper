@@ -23,10 +23,29 @@ func (dt *DataType) IsValid() bool {
 }
 
 type SaveDataRequestModel struct {
+	UserID      string
 	BinaryID    string
 	Description string
-	DataType DataType
+	DataType    DataType
 }
 
 type SaveDataResponseModel struct {
+}
+
+type GetDataByIDRequestModel struct {
+	UserID string
+	ID     string
+}
+
+type GetDataByIDResponseModel struct {
+	ID          int
+	UserID      string
+	BinaryID    string
+	Description string
+	DataType    string
+}
+
+type RemoveDataByIDRequestModel struct {
+	UserID string
+	ID     string
 }

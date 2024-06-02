@@ -16,7 +16,7 @@ type Usecase struct {
 	storage  Storager
 	fstorage FileStorager
 
-	secretkeyHandler *appcommon.SecretKeyHandler
+	dataCipherHandler *appcommon.DataCipherHandler
 }
 
 func New(conf Config, storage Storager, fstorager FileStorager) (*Usecase, error) {
@@ -26,7 +26,7 @@ func New(conf Config, storage Storager, fstorager FileStorager) (*Usecase, error
 	uc.storage = storage
 	uc.fstorage = fstorager
 	uc.conf = conf
-	uc.secretkeyHandler, err = appcommon.NewSecretKeyHandler(conf.SecretKeySecure)
+	uc.dataCipherHandler, err = appcommon.NewDataCipherHandler(conf.DataSecretKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create secret key handler: %w", err)
 	}
@@ -35,13 +35,9 @@ func New(conf Config, storage Storager, fstorager FileStorager) (*Usecase, error
 }
 
 func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestModel) error {
-	// todo зашифровать данные
-	sc, err := uc.storage.GetSecretKeyByUserID(ctx, request.UserID)
-	if err != nil {
-		return fmt.Errorf("failed to get secret key: %w", err)
-	}
-	r := bytes.NewReader(request.Data)
-	sfr, err := uc.fstorage.SaveFile(ctx, r)
+	encryptedData := uc.dataCipherHandler.Encrypt(request.Data)
+	r := bytes.NewReader(encryptedData)
+	sfr, err := uc.fstorage.SaveData(ctx, r)
 	if err != nil {
 		return fmt.Errorf("failed to save file: %w", err)
 	}
@@ -53,8 +49,17 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 	}
 	_, err = uc.storage.SaveData(ctx, rsd)
 	if err != nil {
-		// todo удалить сохраненный файл
-		return fmt.Errorf("failed to save data: %w", err)
+		err = fmt.Errorf("failed to save data: %w", err)
+		// удаляем сохраненный файл
+		removeDataErr := uc.fstorage.RemoveDataByID(ctx, sfr.ID)
+		if removeDataErr != nil {
+			err = fmt.Errorf("failed delete not save data: %w", err)
+		}
+		return err
 	}
 	return nil
+}
+
+func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRequestModel) (*model.GetDataByIDResponseModel, error) {
+	uc.fstorage.
 }
