@@ -11,7 +11,9 @@ import (
 	grpcserver "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	storagePostgres "github.com/KartoonYoko/gophkeeper/internal/storage/postgres"
+	storageMinio "github.com/KartoonYoko/gophkeeper/internal/storage/miniostorage"
 	usecaseAuth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
+	usecaseStore "github.com/KartoonYoko/gophkeeper/internal/usecase/store"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +32,17 @@ func Run() {
 	}
 	psSt, err := storagePostgres.New(ctx, psConf)
 	if err != nil {
-		logger.Log.Error("storage init error: %s", zap.Error(err))
+		logger.Log.Error("storage init error", zap.Error(err))
+		return
+	}
+	msConf := storageMinio.Config{
+		Endpoint: "",
+		AccessKeyID: "",
+		SecretAccessKey: "",
+	}
+	mstorage, err := storageMinio.NewStorage(msConf)
+	if err != nil {
+		logger.Log.Error("minio storage init error", zap.Error(err))
 		return
 	}
 	// usecases
@@ -42,6 +54,11 @@ func Run() {
 		PasswordSault:              passwordSault,
 	}
 	ucAuth := usecaseAuth.New(psSt, ucAConf)
+	sConf := usecaseStore.Config{
+		SecretKeySecure: "",
+		DataSecretKey: "",
+	}
+	usecaseStore.New(sConf, psSt, mstorage)
 
 	// server
 	grpcConf := grpcserver.Config{

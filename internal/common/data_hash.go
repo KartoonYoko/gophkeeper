@@ -3,7 +3,6 @@ package common
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/hex"
 )
 
 type DataCipherHandler struct {
@@ -47,16 +46,6 @@ func (h *DataCipherHandler) Encrypt(data []byte) []byte {
 	return h.aesgcm.Seal(nil, h.nonce, data, nil)
 }
 
-func (h *DataCipherHandler) Decrypt(encrypted string) (encryptedname string, err error) {
-	encd, err := hex.DecodeString(encrypted)
-	if err != nil {
-		return "", err
-	}
-
-	dst, err := h.aesgcm.Open(nil, h.nonce, encd, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return string(dst), nil
+func (h *DataCipherHandler) Decrypt(data []byte) (encryptedname []byte, err error) {
+	return h.aesgcm.Open(nil, h.nonce, data, nil)
 }

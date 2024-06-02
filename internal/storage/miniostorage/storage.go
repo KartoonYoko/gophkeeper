@@ -35,7 +35,7 @@ func NewStorage(conf Config) (*Storage, error) {
 	return s, nil
 }
 
-func (s *Storage) SaveData(ctx context.Context, request filestoremodel.SaveDataRequestModel) (*filestoremodel.SaveDataResponseModel, error) {
+func (s *Storage) SaveData(ctx context.Context, request *filestoremodel.SaveDataRequestModel) (*filestoremodel.SaveDataResponseModel, error) {
 	contentType := "application/octet-stream"
 
 	objName, err := s.generateDataKey()
@@ -60,7 +60,7 @@ func (s *Storage) SaveData(ctx context.Context, request filestoremodel.SaveDataR
 	return response, nil
 }
 
-func (s *Storage) GetDataByID(ctx context.Context, request filestoremodel.GetDataByIDRequestModel) (*filestoremodel.GetDataByIDResponseModel, error) {
+func (s *Storage) GetDataByID(ctx context.Context, request *filestoremodel.GetDataByIDRequestModel) (*filestoremodel.GetDataByIDResponseModel, error) {
 	obj, err := s.client.GetObject(ctx, request.UserID, request.ID, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (s *Storage) GetDataByID(ctx context.Context, request filestoremodel.GetDat
 	return response, nil
 }
 
-func (s *Storage) RemoveDataByID(ctx context.Context, request filestoremodel.RemoveDataByIDRequestModel) error {
+func (s *Storage) RemoveDataByID(ctx context.Context, request *filestoremodel.RemoveDataByIDRequestModel) error {
 	return s.client.RemoveObject(ctx, request.UserID, request.ID, minio.RemoveObjectOptions{})
 }
 

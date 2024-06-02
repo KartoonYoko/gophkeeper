@@ -7,6 +7,7 @@ option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
 // StoreService сервис для хранения приватных данных
 service StoreService {
     rpc SaveData (SaveDataRequest) returns (SaveDataResponse);
+    rpc GetDataByID (GetDataByIDRequest) returns (GetDataByIDResponse);
 }
 
 message SaveDataRequest {
@@ -24,4 +25,14 @@ enum DataTypeEnum {
     DATA_TYPE_TEXT = 1;
     DATA_TYPE_BINARY = 2;
     DATA_TYPE_BANK_CARD = 3;
+}
+
+message GetDataByIDRequest {
+    int32 id = 1;
+}
+
+message GetDataByIDResponse {
+    DataTypeEnum type = 1;
+    string description = 2;
+    bytes data = 3;
 }
