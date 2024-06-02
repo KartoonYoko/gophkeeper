@@ -9,7 +9,6 @@ import (
 	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
 	serror "github.com/KartoonYoko/gophkeeper/internal/storage/error/auth"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
-	"github.com/KartoonYoko/gophkeeper/internal/usecase/common"
 	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/auth"
 )
@@ -120,16 +119,16 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 }
 
 func (uc *Usecase) BuildJWTString(userID string) (string, error) {
-	builder := common.NewJWTStringBuilder(
+	builder := uccommon.NewJWTStringBuilder(
 		uc.conf.SecretJWTKey,
-		common.WithUserID(userID),
-		common.WithTokeExpiredAtInMinute(uc.conf.JWTDurationMinute))
+		uccommon.WithUserID(userID),
+		uccommon.WithTokeExpiredAtInMinute(uc.conf.JWTDurationMinute))
 
 	return builder.BuildJWTString()
 }
 
 func (uc *Usecase) ValidateJWTString(token string) (string, error) {
-	validator := common.NewJWTStringValidator(uc.conf.SecretJWTKey)
+	validator := uccommon.NewJWTStringValidator(uc.conf.SecretJWTKey)
 
 	return validator.ValidateAndGetUserID(token)
 }
