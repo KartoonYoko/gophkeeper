@@ -57,13 +57,7 @@ func (c *Controller) Logout(ctx context.Context, request *pb.LogoutRequest) (*pb
 
 // RefreshToken обновляет токен доступа
 func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
-	userID, err := c.getUserIDFromContext(ctx)
-	if err != nil {
-		logger.Log.Error("can not get user ID from context", zap.Error(err))
-		return nil, status.Errorf(codes.Internal, "internal error")
-	}
-
-	res, err := c.usecaseAuth.RefreshToken(ctx, userID, request.Token.RefreshToken)
+	res, err := c.usecaseAuth.RefreshToken(ctx, request.Token.RefreshToken)
 	if err != nil {
 		logger.Log.Error("can not refresh token", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")

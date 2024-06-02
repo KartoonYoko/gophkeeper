@@ -82,7 +82,6 @@ func (uc *Usecase) Logout(ctx context.Context, userID string, tokenID string) er
 }
 
 func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*model.RefreshTokenResponseModel, error) {
-	// todo
 	// - получить refresh token
 	// - проверить его время жизни
 	// - если невалидный, то вернуть ошибку
@@ -114,6 +113,7 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 
 	result := new(model.RefreshTokenResponseModel)
 	result.RefreshToken = utkn.Token
+	result.UserID = tkn.UserID
 
 	return result, nil
 }

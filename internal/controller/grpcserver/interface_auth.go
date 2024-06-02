@@ -11,7 +11,7 @@ type AuthUsecase interface {
 	Register(ctx context.Context, login string, password string) (*model.RegisterResponseModel, error)
 	Login(ctx context.Context, login string, password string) (*model.LoginResponseModel, error)
 	Logout(ctx context.Context, userID string, tokenID string) error
-	RefreshToken(ctx context.Context, userID string, tokenID string) (*model.RefreshTokenResponseModel, error)
+	RefreshToken(ctx context.Context, refreshToken string) (*model.RefreshTokenResponseModel, error)
 	BuildJWTString(userID string) (string, error)
 	ValidateJWTString(token string) (string, error)
 }

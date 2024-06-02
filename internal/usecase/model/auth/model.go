@@ -11,5 +11,6 @@ type LoginResponseModel struct {
 }
 
 type RefreshTokenResponseModel struct {
+	UserID       string
 	RefreshToken string
 }
