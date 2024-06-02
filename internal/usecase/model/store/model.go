@@ -13,7 +13,7 @@ type SaveDataResponseModel struct {
 
 type GetDataByIDRequestModel struct {
 	UserID string
-	ID     string
+	ID     int
 }
 
 type GetDataByIDResponseModel struct {

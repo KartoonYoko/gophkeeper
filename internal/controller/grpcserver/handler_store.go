@@ -44,7 +44,35 @@ func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.S
 }
 
 func (c *Controller) GetDataByID(ctx context.Context, r *pb.GetDataByIDRequest) (*pb.GetDataByIDResponse, error) {
-}
+	userID, err := c.getUserIDFromContext(ctx)
+	if err != nil {
+		logger.Log.Error("can not get user ID from context", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+	
+	request := &ucmodel.GetDataByIDRequestModel{
+		UserID: userID,
+		ID: int(r.Id),
+	}
+	getDataResponse, err := c.usecaseStore.GetDataByID(ctx, request)
+	if err != nil {
+		logger.Log.Error("unable get data by id", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	dt, err := getProtoDataTypeFromUsecaseDataType(getDataResponse.DataType)
+	if err != nil {
+		logger.Log.Error("wrong data type", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	response := new(pb.GetDataByIDResponse)
+	response.Data = getDataResponse.Data
+	response.Description = getDataResponse.Description
+	response.Type = dt
+
+	return response, nil
+}	
 
 func getUsecaseDataTypeFromProtoDataType(dataType pb.DataTypeEnum) (ucmodel.DataType, error) {
 	switch dataType {
@@ -59,4 +87,19 @@ func getUsecaseDataTypeFromProtoDataType(dataType pb.DataTypeEnum) (ucmodel.Data
 	}
 
 	return ucmodel.DataType(""), fmt.Errorf("invalid data type %s", dataType)
+}
+
+func getProtoDataTypeFromUsecaseDataType(dataType string) (pb.DataTypeEnum, error) {
+	switch dataType {
+	case "TEXT":
+		return pb.DataTypeEnum_DATA_TYPE_TEXT, nil
+	case "BINARY":
+		return pb.DataTypeEnum_DATA_TYPE_BINARY, nil
+	case "BANK_CARD":
+		return pb.DataTypeEnum_DATA_TYPE_BANK_CARD, nil
+	case "CREDENTIALS":
+		return pb.DataTypeEnum_DATA_TYPE_CREDENTIALS, nil
+	}
+
+	return pb.DataTypeEnum(0), fmt.Errorf("invalid data type %s", dataType)
 }

@@ -93,7 +93,7 @@ func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRe
 	// получаем сами данные
 	frequest := &sfmodel.GetDataByIDRequestModel{
 		UserID: request.UserID,
-		ID:     request.ID,
+		ID:     sdr.BinaryID,
 	}
 	gdr, err := uc.fstorage.GetDataByID(ctx, frequest)
 	if err != nil {
