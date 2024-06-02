@@ -18,6 +18,7 @@ func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.L
 	if err != nil {
 		var exsterror *ucauth.LoginOrPasswordNotFoundError
 		if errors.As(err, &exsterror) {
+			logger.Log.Info("login or password not found", zap.String("login", request.Login))	
 			return nil, status.Errorf(codes.Unauthenticated, "login and(or) password not found")
 		}
 

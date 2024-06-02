@@ -26,6 +26,13 @@ type Storager interface {
 		newRefreshToken string,
 		newExpiredAt time.Time) (*smodel.UpdateRefreshTokenResponseModel, error)
 
+	GetUserByLogin(
+		ctx context.Context,
+		login string) (*smodel.GetUserByLoginResponseModel, error)
+	CreateRefreshToken(
+		ctx context.Context,
+		request *smodel.CreateRefreshTokenRequestModel) (*smodel.CreateRefreshTokenResponseModel, error)
+
 	GetRefreshToken(
 		ctx context.Context,
 		request *smodel.GetRefreshTokenRequestModel) (*smodel.GetRefreshTokenResponseModel, error)

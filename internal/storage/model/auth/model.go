@@ -28,3 +28,17 @@ type GetRefreshTokenResponseModel struct {
 	UserID    string
 	ExpiredAt time.Time
 }
+
+type GetUserByLoginResponseModel struct {
+	UserID   string
+	Password string
+}
+
+type CreateRefreshTokenRequestModel struct {
+	UserID    string
+	TokenID   string
+	ExpiredAt time.Time
+}
+
+type CreateRefreshTokenResponseModel struct {
+}

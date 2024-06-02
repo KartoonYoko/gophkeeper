@@ -70,6 +70,44 @@ func (s *Storage) CreateUserAndRefreshToken(
 	return result, nil
 }
 
+func (s *Storage) GetUserByLogin(
+	ctx context.Context,
+	login string) (*model.GetUserByLoginResponseModel, error) {
+	var userID, password string
+	query := `SELECT user_id, password FROM users WHERE login = $1`
+	err := s.pool.QueryRow(ctx, query, login).Scan(&userID, &password)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, serror.NewLoginNotFoundError(login)
+		}
+		return nil, fmt.Errorf("unable to get user: %w", err)
+	}
+
+	res := &model.GetUserByLoginResponseModel{
+		UserID:   userID,
+		Password: password,
+	}
+
+	return res, nil
+}
+
+func (s *Storage) CreateRefreshToken(
+	ctx context.Context,
+	request *model.CreateRefreshTokenRequestModel) (*model.CreateRefreshTokenResponseModel, error) {
+	query := `
+		INSERT INTO user_refresh_token(token_id, user_id, expired_at)
+		VALUES($1, $2, $3)
+		`
+	_, err := s.pool.Exec(ctx, query, request.TokenID, request.UserID, request.ExpiredAt)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create refresh token: %w", err)
+	}
+
+	response := &model.CreateRefreshTokenResponseModel{}
+
+	return response, nil
+}
+
 func (s *Storage) Login(
 	ctx context.Context,
 	login string,

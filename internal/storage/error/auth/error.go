@@ -19,16 +19,16 @@ func (e *LoginAlreadyExistsError) Error() string {
 	return fmt.Sprintf("login %s already exists", e.Login)
 }
 
-// LoginOrPasswordNotFoundError говорит о том, что логин уже существует в БД
+// LoginOrPasswordNotFoundError
 type LoginOrPasswordNotFoundError struct {
-	Login string
+	Login    string
 	Password string
 }
 
 // NewLoginOrPasswordNotFoundError конструктор
 func NewLoginOrPasswordNotFoundError(login string, password string) *LoginOrPasswordNotFoundError {
 	return &LoginOrPasswordNotFoundError{
-		Login: login,
+		Login:    login,
 		Password: password,
 	}
 }
@@ -38,3 +38,19 @@ func (e *LoginOrPasswordNotFoundError) Error() string {
 	return fmt.Sprintf("login %s or password not found", e.Login)
 }
 
+// LoginNotFoundError
+type LoginNotFoundError struct {
+	Login string
+}
+
+// NewLoginNotFoundError конструктор
+func NewLoginNotFoundError(login string) *LoginNotFoundError {
+	return &LoginNotFoundError{
+		Login: login,
+	}
+}
+
+// Error релизует интерфейс error
+func (e *LoginNotFoundError) Error() string {
+	return fmt.Sprintf("login %s not found", e.Login)
+}
