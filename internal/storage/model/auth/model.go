@@ -15,7 +15,16 @@ type LoginResponseModel struct {
 }
 
 type UpdateRefreshTokenResponseModel struct {
-	UserID    string
 	Token     string
+	ExpiredAt time.Time
+}
+
+type GetRefreshTokenRequestModel struct {
+	TokenID string
+}
+
+type GetRefreshTokenResponseModel struct {
+	TokenID   string
+	UserID    string
 	ExpiredAt time.Time
 }

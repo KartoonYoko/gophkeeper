@@ -11,7 +11,7 @@ CREATE TABLE "store"."data" (
 );
 
 ALTER TABLE "store"."data" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
-CREATE UNIQUE INDEX IF NOT EXISTS idx_store.data_binary_id ON "store"."data"("binary_id");
+CREATE UNIQUE INDEX IF NOT EXISTS idx_store_data_binary_id ON "store"."data"("binary_id");
 
 -- +goose StatementEnd
 

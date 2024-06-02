@@ -1,11 +1,23 @@
 package common
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+func GenerateRefreshToken() (string, error) {
+	n := 16
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		return ``, err
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
 
 // Claims — структура утверждений, которая включает стандартные утверждения
 // и одно пользовательское — UserID
@@ -15,9 +27,9 @@ type Claims struct {
 }
 
 type JWTStringBuilder struct {
-	secretKey string 
+	secretKey string
 
-	userID string
+	userID                 string
 	tokenExpiredAtInMinute int
 }
 
@@ -25,10 +37,10 @@ func NewJWTStringBuilder(secretKey string, opts ...func(*JWTStringBuilder)) JWTS
 	o := JWTStringBuilder{}
 	o.secretKey = secretKey
 
-    for _, opt := range opts {
-        opt(&o)
-    }
-    return o
+	for _, opt := range opts {
+		opt(&o)
+	}
+	return o
 }
 
 // WithUserID — добавляет ID пользователя в токен
@@ -44,7 +56,6 @@ func WithTokeExpiredAtInMinute(minutes int) func(*JWTStringBuilder) {
 		o.tokenExpiredAtInMinute = minutes
 	}
 }
-
 
 // BuildJWTString создаёт токен и возвращает его в виде строки.
 func (b *JWTStringBuilder) BuildJWTString() (string, error) {
@@ -64,7 +75,7 @@ func (b *JWTStringBuilder) BuildJWTString() (string, error) {
 }
 
 type JWTStringValidator struct {
-	secretKey string 
+	secretKey string
 }
 
 func NewJWTStringValidator(secretKey string) JWTStringValidator {

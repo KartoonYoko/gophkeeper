@@ -26,7 +26,9 @@ func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info 
 	// 	- провалидировать полученный токен
 	// 	- внести токен в контекст
 
-	if info.FullMethod == "/proto.AuthService/Login" || info.FullMethod == "/proto.AuthService/Register" {
+	if info.FullMethod == "/proto.AuthService/Login" ||
+		info.FullMethod == "/proto.AuthService/Register" ||
+		info.FullMethod == "/proto.AuthService/RefreshToken" {
 		return handler(ctx, req)
 	}
 
@@ -39,19 +41,34 @@ func (c *Controller) interceptorAuth(ctx context.Context, req interface{}, info 
 		return nil, status.Error(codes.Internal, "")
 	}
 
-	sl := md.Get("Authorization")
-	if len(sl) == 0 {
-		return nil, status.Error(codes.Unauthenticated, "not found token")
-	} else {
-		token, _ := strings.CutPrefix(sl[0], "Bearer ")
-		userID, err = c.usecaseAuth.ValidateJWTString(token)
-		if err != nil {
-			logger.Log.Error("can not validate and get user ID: ", zap.Error(err))
-			return nil, status.Error(codes.Unauthenticated, "token is wrong")
-		}
+	token, err := getJWTTokenFromMetadata(&md)
+	if err != nil {
+		logger.Log.Error("get token error", zap.Error(err))
+		return nil, err
+	}
+
+	userID, err = c.usecaseAuth.ValidateJWTString(token)
+	if err != nil {
+		logger.Log.Error("can not validate and get user ID: ", zap.Error(err))
+		return nil, status.Error(codes.Unauthenticated, "token is wrong")
 	}
 
 	ctx = context.WithValue(ctx, ctxKeyUserID, userID)
 
 	return handler(ctx, req)
+}
+
+func getJWTTokenFromMetadata(md *metadata.MD) (string, error) {
+	sl := md.Get("Authorization")
+	if len(sl) == 0 {
+		return "", status.Error(codes.Unauthenticated, "not found token")
+	}
+
+	token, _ := strings.CutPrefix(sl[0], "Bearer ")
+
+	if len(token) == 0 {
+		return "", status.Error(codes.Unauthenticated, "not found token")
+	}
+
+	return token, nil
 }

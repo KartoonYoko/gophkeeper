@@ -36,9 +36,9 @@ func Run() {
 		return
 	}
 	msConf := storageMinio.Config{
-		Endpoint: "",
-		AccessKeyID: "",
-		SecretAccessKey: "",
+		Endpoint: "localhost:9000",
+		AccessKeyID: "gophkeeper",
+		SecretAccessKey: "supersecret",
 	}
 	mstorage, err := storageMinio.NewStorage(msConf)
 	if err != nil {
@@ -55,8 +55,8 @@ func Run() {
 	}
 	ucAuth := usecaseAuth.New(psSt, ucAConf)
 	sConf := usecaseStore.Config{
-		SecretKeySecure: "",
-		DataSecretKey: "",
+		SecretKeySecure: "default",
+		DataSecretKey: "default",
 	}
 	ucStore, err := usecaseStore.New(sConf, psSt, mstorage)
 	if err != nil {

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
 )
@@ -21,9 +22,13 @@ type Storager interface {
 
 	UpdateRefreshToken(
 		ctx context.Context,
-		userID string,
 		refreshToken string,
-		refreshTokenDurationMinute int) (*smodel.UpdateRefreshTokenResponseModel, error)
+		newRefreshToken string,
+		newExpiredAt time.Time) (*smodel.UpdateRefreshTokenResponseModel, error)
+
+	GetRefreshToken(
+		ctx context.Context,
+		request *smodel.GetRefreshTokenRequestModel) (*smodel.GetRefreshTokenResponseModel, error)
 
 	RemoveRefreshToken(ctx context.Context, userID string, tokenID string) error
 }

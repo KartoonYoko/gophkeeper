@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
 	serror "github.com/KartoonYoko/gophkeeper/internal/storage/error/auth"
+	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/common"
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/auth"
 )
 
@@ -29,7 +32,7 @@ func New(storage Storager, config Config) *Usecase {
 }
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) (*model.RegisterResponseModel, error) {
-	hpswd ,err := uc.encodePassword(password)
+	hpswd, err := uc.encodePassword(password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash passwd: %w", err)
 	}
@@ -50,7 +53,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 }
 
 func (uc *Usecase) Login(ctx context.Context, login string, password string) (*model.LoginResponseModel, error) {
-	hpswd ,err := uc.encodePassword(password)
+	hpswd, err := uc.encodePassword(password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash passwd: %w", err)
 	}
@@ -79,15 +82,39 @@ func (uc *Usecase) Logout(ctx context.Context, userID string, tokenID string) er
 	return nil
 }
 
-func (uc *Usecase) RefreshToken(ctx context.Context, userID string, tokenID string) (*model.RefreshTokenResponseModel, error) {
-	res, err := uc.storage.UpdateRefreshToken(ctx, userID, tokenID, uc.conf.RefreshTokenDurationMinute)
+func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*model.RefreshTokenResponseModel, error) {
+	// todo
+	// - получить refresh token
+	// - проверить его время жизни
+	// - если невалидный, то вернуть ошибку
+	// - иначе обновить токен и время жизни
+
+	r := &smodel.GetRefreshTokenRequestModel{
+		TokenID: refreshToken,
+	}
+	tkn, err := uc.storage.GetRefreshToken(ctx, r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get refresh token: %w", err)
+	}
+
+	// проверить время жизни токена
+	if tkn.ExpiredAt.After(time.Now().UTC()) {
+		return nil, fmt.Errorf("refresh token expired")
+	}
+
+	newTkn, err := uccommon.GenerateRefreshToken()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
+	}
+	tknExpiredAt := uc.refreshTokenExpiredAt()
+
+	utkn, err := uc.storage.UpdateRefreshToken(ctx, tkn.TokenID, newTkn, tknExpiredAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to refresh token: %w", err)
 	}
 
 	result := new(model.RefreshTokenResponseModel)
-	result.RefreshToken = res.Token
-	result.UserID = res.UserID
+	result.RefreshToken = utkn.Token
 
 	return result, nil
 }
@@ -109,4 +136,9 @@ func (uc *Usecase) ValidateJWTString(token string) (string, error) {
 
 func (uc *Usecase) encodePassword(password string) (string, error) {
 	return uc.pswdHasher.Hash(password)
+}
+
+func (uc *Usecase) refreshTokenExpiredAt() time.Time {
+	duration := time.Minute * time.Duration(uc.conf.RefreshTokenDurationMinute)
+	return time.Now().UTC().Add(duration)
 }

@@ -125,37 +125,38 @@ func (s *Storage) RemoveRefreshToken(ctx context.Context, userID string, tokenID
 	return nil
 }
 
+func (s *Storage) GetRefreshToken(ctx context.Context, request *model.GetRefreshTokenRequestModel) (*model.GetRefreshTokenResponseModel, error) {
+	var userID string
+	var expiredAt time.Time
+	query := `SELECT user_id, expired_at FROM user_refresh_token WHERE token_id = $1`
+	err := s.pool.QueryRow(ctx, query, request.TokenID).Scan(&userID, &expiredAt)
+	if err != nil {
+		return nil, fmt.Errorf("unable find refresh token: %w", err)
+	}
+
+	return &model.GetRefreshTokenResponseModel{
+		TokenID:   request.TokenID,
+		UserID:    userID,
+		ExpiredAt: expiredAt,
+	}, nil
+}
+
 func (s *Storage) UpdateRefreshToken(
 	ctx context.Context,
-	userID string,
 	refreshToken string,
-	refreshTokenDurationMinute int) (*model.UpdateRefreshTokenResponseModel, error) {
-	query := `DELETE FROM user_refresh_token WHERE user_id = $1 AND token_id = $2`
-	_, err := s.pool.Exec(ctx, query, userID, refreshToken)
+	newRefreshToken string,
+	newExpiredAt time.Time) (*model.UpdateRefreshTokenResponseModel, error) {
+
+	query := `UPDATE user_refresh_token SET(token_id=$1, expired_at=$2) WHERE token_id = $3`
+	_, err := s.pool.Exec(ctx, query, newRefreshToken, newExpiredAt, refreshToken)
 	if err != nil {
-		return nil, fmt.Errorf("unable to remove refresh token: %w", err)
+		return nil, fmt.Errorf("unable find refresh token: %w", err)
 	}
 
-	tokenID, err := common.GenerateRefreshToken()
-	if err != nil {
-		return nil, fmt.Errorf("refresh token generation error: %w", err)
-	}
-	query = `
-		INSERT INTO user_refresh_token(token_id, user_id, expired_at)
-		VALUES($1, $2, $3)
-		`
-	expiredAt := s.getRefreshTokeExpiredAt(refreshTokenDurationMinute)
-	_, err = s.pool.Exec(ctx, query, tokenID, userID, expiredAt)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create refresh token: %w", err)
-	}
-
-	result := new(model.UpdateRefreshTokenResponseModel)
-	result.UserID = userID
-	result.ExpiredAt = expiredAt
-	result.Token = tokenID
-
-	return result, nil
+	return &model.UpdateRefreshTokenResponseModel{
+		Token:     newRefreshToken,
+		ExpiredAt: newExpiredAt,
+	}, nil
 }
 
 func (s *Storage) getRefreshTokeExpiredAt(refreshTokenDurationMinute int) time.Time {
