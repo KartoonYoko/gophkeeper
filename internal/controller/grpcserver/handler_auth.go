@@ -22,6 +22,12 @@ func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.L
 			return nil, status.Errorf(codes.Unauthenticated, "login and(or) password not found")
 		}
 
+		var loginNotFoundError *ucauth.LoginNotFoundError
+		if errors.As(err, &loginNotFoundError) {
+			logger.Log.Info("login not found", zap.String("login", request.Login))	
+			return nil, status.Errorf(codes.Unauthenticated, "login and(or) password not found")
+		}
+
 		logger.Log.Error("failed to login user", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}

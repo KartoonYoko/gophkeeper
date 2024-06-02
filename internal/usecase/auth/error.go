@@ -37,3 +37,21 @@ func NewLoginOrPasswordNotFoundError(login string, password string) *LoginOrPass
 func (e *LoginOrPasswordNotFoundError) Error() string {
 	return fmt.Sprintf("login %s or password not found", e.Login)
 }
+
+// LoginNotFoundError
+type LoginNotFoundError struct {
+	Login string
+}
+
+// NewLoginNotFoundError конструктор
+func NewLoginNotFoundError(login string) *LoginNotFoundError {
+	return &LoginNotFoundError{
+		Login: login,
+	}
+}
+
+// Error релизует интерфейс error
+func (e *LoginNotFoundError) Error() string {
+	return fmt.Sprintf("login %s not found", e.Login)
+}
+

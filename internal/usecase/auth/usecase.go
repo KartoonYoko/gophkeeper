@@ -7,13 +7,10 @@ import (
 	"time"
 
 	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
-	"github.com/KartoonYoko/gophkeeper/internal/logger"
-	"github.com/KartoonYoko/gophkeeper/internal/storage/common"
 	serror "github.com/KartoonYoko/gophkeeper/internal/storage/error/auth"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
 	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/auth"
-	"go.uber.org/zap"
 )
 
 type Usecase struct {
@@ -65,37 +62,40 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 	if err != nil {
 		var exsterror *serror.LoginNotFoundError
 		if errors.As(err, &exsterror) {
-			return nil, serror.NewLoginNotFoundError(exsterror.Login)
+			return nil, NewLoginNotFoundError(exsterror.Login)
 		}
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
 	// TODO работает ли?
-	// проверка пароля 
+	// проверка пароля
 	hpswd, err := uc.encodePassword(password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash passwd: %w", err)
 	}
 	if !uc.pswdHasher.CheckHash(getUserResponse.Password, hpswd) {
-		return nil, serror.NewLoginOrPasswordNotFoundError(login, password)
+		return nil, NewLoginOrPasswordNotFoundError(login, password)
 	}
-	
+
 	// создать рефреш токен
 	tokenID, err := uccommon.GenerateRefreshToken()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
 	addRefreshTokenRequest := &smodel.CreateRefreshTokenRequestModel{
-		UserID: getUserResponse.UserID,
-		TokenID: tokenID,
+		UserID:    getUserResponse.UserID,
+		TokenID:   tokenID,
 		ExpiredAt: uc.refreshTokenExpiredAt(),
 	}
-	m, err := uc.storage.CreateRefreshToken(ctx, addRefreshTokenRequest)
+	_, err = uc.storage.CreateRefreshToken(ctx, addRefreshTokenRequest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create refresh token: %w", err)
+	}
 
-	// resModel := new(model.LoginResponseModel)
-	// resModel.UserID = 
-	// resModel.RefreshToken = m.Token
-
+	resModel := new(model.LoginResponseModel)
+	resModel.UserID = getUserResponse.UserID
+	resModel.RefreshToken = tokenID
+	
 	return resModel, nil
 }
 
