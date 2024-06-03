@@ -20,6 +20,7 @@ func (s *Storage) CreateUserAndRefreshToken(
 	login string,
 	password string,
 	refreshTokenDurationMinute int) (*model.CreateUserAndRefreshTokenResponseModel, error) {
+		// TODO
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("unable to start transaction: %w", err)
@@ -166,7 +167,7 @@ func (s *Storage) RemoveRefreshToken(ctx context.Context, userID string, tokenID
 func (s *Storage) GetRefreshToken(ctx context.Context, request *model.GetRefreshTokenRequestModel) (*model.GetRefreshTokenResponseModel, error) {
 	var userID string
 	var expiredAt time.Time
-	query := `SELECT user_id, expired_at FROM user_refresh_token WHERE token_id = $1`
+	query := `SELECT user_id, expired_at FROM user_refresh_token WHERE token_id=$1`
 	err := s.pool.QueryRow(ctx, query, request.TokenID).Scan(&userID, &expiredAt)
 	if err != nil {
 		return nil, fmt.Errorf("unable find refresh token: %w", err)
@@ -185,7 +186,7 @@ func (s *Storage) UpdateRefreshToken(
 	newRefreshToken string,
 	newExpiredAt time.Time) (*model.UpdateRefreshTokenResponseModel, error) {
 
-	query := `UPDATE user_refresh_token SET(token_id=$1, expired_at=$2) WHERE token_id = $3`
+	query := `UPDATE user_refresh_token SET token_id=$1, expired_at=$2 WHERE token_id=$3`
 	_, err := s.pool.Exec(ctx, query, newRefreshToken, newExpiredAt, refreshToken)
 	if err != nil {
 		return nil, fmt.Errorf("unable find refresh token: %w", err)
