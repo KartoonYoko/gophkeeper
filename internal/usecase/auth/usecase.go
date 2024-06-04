@@ -11,31 +11,50 @@ import (
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
 	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/auth"
+	"github.com/google/uuid"
 )
 
 type Usecase struct {
 	storage Storager
 	conf    Config
 
-	pswdHasher *appcommon.SHA256PasswordHasher
+	pswdHasher       *appcommon.SHA256PasswordHasher
+	secretkeyHandler *appcommon.SecretKeyHandler
 }
 
-func New(storage Storager, config Config) *Usecase {
+func New(storage Storager, config Config) (*Usecase, error) {
+	var err error
 	uc := new(Usecase)
 
 	uc.conf = config
 	uc.storage = storage
 	uc.pswdHasher = appcommon.NewSHA256PasswordHasher()
+	uc.secretkeyHandler, err = appcommon.NewSecretKeyHandler(uc.conf.SecretKeySecure)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create secret key handler: %v", err)
+	}
 
-	return uc
+	return uc, nil
 }
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) (*model.RegisterResponseModel, error) {
+	// создаём пользователя
+	sc, err := uc.secretkeyHandler.GenerateEncryptedSecretKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate secret key: %w", err)
+	}
 	hpswd, err := uc.pswdHasher.Hash(password)
 	if err != nil {
-		return nil, fmt.Errorf("failed to hash passwd: %w", err)
+		return nil, fmt.Errorf("failed to generate password: %w", err)
 	}
-	m, err := uc.storage.CreateUserAndRefreshToken(ctx, login, hpswd, uc.conf.RefreshTokenDurationMinute)
+	userID := uuid.New().String()
+	createUserRequest := &smodel.CreateUserRequestModel{
+		Login:     login,
+		Password:  hpswd,
+		UserID:    userID,
+		SecretKey: sc,
+	}
+	_, err = uc.storage.CreateUser(ctx, createUserRequest)
 	if err != nil {
 		var exsterror *serror.LoginAlreadyExistsError
 		if errors.As(err, &exsterror) {
@@ -44,11 +63,28 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 		return nil, fmt.Errorf("failed to register: %w", err)
 	}
 
-	resModel := new(model.RegisterResponseModel)
-	resModel.UserID = m.UserID
-	resModel.RefreshToken = m.Token
+	// создаём токен обновления
+	rt, err := appcommon.GenerateRefreshToken()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
+	}
+	createRefreshTokenRequest := &smodel.CreateRefreshTokenRequestModel{
+		UserID:    userID,
+		TokenID:   rt,
+		ExpiredAt: uc.refreshTokenExpiredAt(),
+	}
+	_, err = uc.storage.CreateRefreshToken(ctx, createRefreshTokenRequest)
+	if err != nil {
+		// todo удалить пользователя
+		return nil, fmt.Errorf("failed create refresh token: %w", err)
+	}
 
-	return resModel, nil
+	response := &model.RegisterResponseModel{
+		RefreshToken: rt,
+		UserID:       userID,
+	}
+
+	return response, nil
 }
 
 func (uc *Usecase) Login(ctx context.Context, login string, password string) (*model.LoginResponseModel, error) {
@@ -89,7 +125,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 	resModel := new(model.LoginResponseModel)
 	resModel.UserID = getUserResponse.UserID
 	resModel.RefreshToken = tokenID
-	
+
 	return resModel, nil
 }
 

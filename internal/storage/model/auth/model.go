@@ -42,3 +42,13 @@ type CreateRefreshTokenRequestModel struct {
 
 type CreateRefreshTokenResponseModel struct {
 }
+
+type CreateUserRequestModel struct {
+	UserID    string
+	Login     string
+	SecretKey string
+	Password  string
+}
+
+type CreateUserReqsponseModel struct {
+}
