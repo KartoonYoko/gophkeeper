@@ -54,3 +54,24 @@ func NewLoginNotFoundError(login string) *LoginNotFoundError {
 func (e *LoginNotFoundError) Error() string {
 	return fmt.Sprintf("login %s not found", e.Login)
 }
+
+// NotFoundError
+type NotFoundError struct {
+	Err error
+}
+
+// NewNotFoundError конструктор
+func NewNotFoundError(err error) *NotFoundError {
+	return &NotFoundError{}
+}
+
+// Error релизует интерфейс error
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("not found: %s", e.Err)
+}
+
+// Unwrap для errors.Unwrap
+func (e *NotFoundError) Unwrap() error {
+	return e.Err
+}
+

@@ -55,3 +55,22 @@ func (e *LoginNotFoundError) Error() string {
 	return fmt.Sprintf("login %s not found", e.Login)
 }
 
+// RefreshTokenNotFoundError
+type RefreshTokenNotFoundError struct {
+	Token string
+}
+
+// NewRefreshTokenNotFoundError конструктор
+func NewRefreshTokenNotFoundError(token string) *RefreshTokenNotFoundError {
+	return &RefreshTokenNotFoundError{
+		Token: token,
+	}
+}
+
+// Error релизует интерфейс error
+func (e *RefreshTokenNotFoundError) Error() string {
+	return fmt.Sprintf("token %s not found", e.Token)
+}
+
+
+

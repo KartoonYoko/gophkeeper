@@ -51,7 +51,11 @@ func Run() {
 		SecretJWTKey:               "somesecretjwtkey",
 		JWTDurationMinute:          5,
 	}
-	ucAuth := usecaseAuth.New(psSt, ucAConf)
+	ucAuth, err := usecaseAuth.New(psSt, ucAConf)
+	if err != nil {
+		logger.Log.Error("usecase auth init error", zap.Error(err))
+		return
+	}
 	sConf := usecaseStore.Config{
 		SecretKeySecure: "default",
 		DataSecretKey: "default",

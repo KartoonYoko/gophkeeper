@@ -149,11 +149,16 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 	}
 	tkn, err := uc.storage.GetRefreshToken(ctx, r)
 	if err != nil {
+		// если токена не существует, то вернуть ошибку
+		var notfound *serror.NotFoundError
+		if errors.As(err, &notfound) {
+			return nil, NewRefreshTokenNotFoundError(refreshToken)
+		}
 		return nil, fmt.Errorf("failed to get refresh token: %w", err)
 	}
 
 	// проверить время жизни токена
-	if tkn.ExpiredAt.After(time.Now().UTC()) {
+	if tkn.ExpiredAt.Before(time.Now().UTC()) {
 		return nil, fmt.Errorf("refresh token expired")
 	}
 

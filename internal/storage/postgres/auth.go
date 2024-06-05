@@ -88,6 +88,9 @@ func (s *Storage) GetRefreshToken(ctx context.Context, request *model.GetRefresh
 	query := `SELECT user_id, expired_at FROM user_refresh_token WHERE token_id=$1`
 	err := s.pool.QueryRow(ctx, query, request.TokenID).Scan(&userID, &expiredAt)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, serror.NewNotFoundError(err)
+		}
 		return nil, fmt.Errorf("unable find refresh token: %w", err)
 	}
 

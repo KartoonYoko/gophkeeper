@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
+	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -18,13 +18,13 @@ func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.L
 	if err != nil {
 		var exsterror *ucauth.LoginOrPasswordNotFoundError
 		if errors.As(err, &exsterror) {
-			logger.Log.Info("login or password not found", zap.String("login", request.Login))	
+			logger.Log.Info("login or password not found", zap.String("login", request.Login))
 			return nil, status.Errorf(codes.Unauthenticated, "login and(or) password not found")
 		}
 
 		var loginNotFoundError *ucauth.LoginNotFoundError
 		if errors.As(err, &loginNotFoundError) {
-			logger.Log.Info("login not found", zap.String("login", request.Login))	
+			logger.Log.Info("login not found", zap.String("login", request.Login))
 			return nil, status.Errorf(codes.Unauthenticated, "login and(or) password not found")
 		}
 
@@ -66,6 +66,11 @@ func (c *Controller) Logout(ctx context.Context, request *pb.LogoutRequest) (*pb
 func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	res, err := c.usecaseAuth.RefreshToken(ctx, request.Token.RefreshToken)
 	if err != nil {
+		var exsterror *ucauth.RefreshTokenNotFoundError
+		if errors.As(err, &exsterror) {
+			return nil, status.Errorf(codes.Unauthenticated, "refresh token not found")
+		}
+
 		logger.Log.Error("can not refresh token", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
