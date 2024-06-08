@@ -46,7 +46,9 @@ func Run() {
 func authInterpector(ctx context.Context, method string, req interface{},
 	reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker,
 	opts ...grpc.CallOption) error {
-	if method == "" {
+	if method == "/proto.AuthService/Login" ||
+		method == "/proto.AuthService/Register" ||
+		method == "/proto.AuthService/RefreshToken" {
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 	at, _, err := tokenstore.GetTokens()

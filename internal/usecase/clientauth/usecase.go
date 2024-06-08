@@ -27,10 +27,9 @@ func New(conn *grpc.ClientConn, store *clientstorage.Storage) *Usecase {
 }
 
 func (uc *Usecase) Login(ctx context.Context, login string, password string) error {
-	// TODO
 	// попытаться залогиниться
 	// если ошибка, то сообщить и выход
-	// если успех, то сохранить токен, а также ключ для шифровки/дешифровки (TODO)
+	// если успех, то сохранить токен
 	request := &pb.LoginRequest{
 		Login:    login,
 		Password: password,
@@ -61,7 +60,6 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) err
 }
 
 func (uc *Usecase) Logout(ctx context.Context) error {
-	// TODO set acceess token
 	_, rt, err := uc.storage.GetTokens()
 	if err != nil {
 		return err
