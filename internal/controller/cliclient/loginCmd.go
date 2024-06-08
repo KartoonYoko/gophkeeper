@@ -4,14 +4,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	flagLoginLogin    string
-	flagLoginPassword string
-)
-
 func init() {
-	loginCmd.PersistentFlags().StringVar(&flagLoginLogin, "login", "", "set your login to authenticate")
-	loginCmd.PersistentFlags().StringVar(&flagLoginPassword, "password", "", "set your password to authenticate")
+	loginCmd.Flags().String("login", "", "set your login to login")
+	loginCmd.Flags().String("password", "", "set your password to login")
 
 	root.AddCommand(loginCmd)
 }
@@ -30,19 +25,29 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
-		if flagLoginPassword == "" {
+		flogin, err := validateRequiredStringFlag(cmd, "login")
+		if err != nil {
+			cmd.PrintErrln(err)
+			return
+		}
+		fpassword, err := validateRequiredStringFlag(cmd, "login")
+		if err != nil {
+			cmd.PrintErrln(err)
+			return
+		}
+		if fpassword == "" {
 			wordPromptContent := promptContent{
 				"Please provide a password.",
 				"Enter a password:",
 			}
-			flagLoginPassword, err = promptPasswordInput(wordPromptContent)
+			fpassword, err = promptPasswordInput(wordPromptContent)
 			if err != nil {
 				cmd.PrintErrln(err)
 				return
 			}
 		}
 
-		err = controller.ucauth.Login(ctx, flagLoginLogin, flagLoginPassword)
+		err = controller.ucauth.Login(ctx, flogin, fpassword)
 		if err != nil {
 			cmd.PrintErrln(err)
 			return

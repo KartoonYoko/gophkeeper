@@ -10,8 +10,8 @@ var (
 )
 
 func init() {
-	registerCmd.PersistentFlags().StringVar(&flagRegisterLogin, "login", "", "set your login to authenticate")
-	registerCmd.PersistentFlags().StringVar(&flagRegisterPassword, "password", "", "set your password to authenticate")
+	registerCmd.Flags().StringVar(&flagRegisterLogin, "login", "", "set your login to authenticate")
+	registerCmd.Flags().StringVar(&flagRegisterPassword, "password", "", "set your password to authenticate")
 
 	root.AddCommand(registerCmd)
 }
