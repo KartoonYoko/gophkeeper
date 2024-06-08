@@ -2,11 +2,13 @@ package clientauth
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/storage/clientstorage"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Usecase struct {
@@ -15,51 +17,69 @@ type Usecase struct {
 	storage *clientstorage.Storage
 }
 
-func New(conn *grpc.ClientConn) *Usecase {
+func New(conn *grpc.ClientConn, store *clientstorage.Storage) *Usecase {
 	uc := new(Usecase)
 
 	uc.client = pb.NewAuthServiceClient(conn)
-	var err error
-	uc.storage, err = clientstorage.New()
-	if err != nil {
-		// todo либо вернуть ошибку, либо обработать;
-		// а лучше прокинуть сюда хранилище через параметр
-		log.Fatal(err)
-	}
+	uc.storage = store
 
 	return uc
 }
 
 func (uc *Usecase) Login(ctx context.Context, login string, password string) error {
-	return nil
 	// TODO
 	// попытаться залогиниться
 	// если ошибка, то сообщить и выход
-	// если успех, то сохранить токен, а также ключ для шифровки/дешифровки
-	//
+	// если успех, то сохранить токен, а также ключ для шифровки/дешифровки (TODO)
+	request := &pb.LoginRequest{
+		Login:    login,
+		Password: password,
+	}
+	response, err := uc.client.Login(ctx, request)
+	if err != nil {
+		if e, ok := status.FromError(err); ok {
+			if e.Code() == codes.NotFound {
+				// сообщить ошибкой, что пользователь не найден
+				return fmt.Errorf("login or password not found")
+			} else {
+				// сообщить о неизвестной ошибке
+				return fmt.Errorf("unhandled error: %w", err)
+			}
+		} else {
+			// сообщить о неизвестной ошибке
+			return fmt.Errorf("unhandled error: %w", err)
+		}
+	}
 
-	// request := &pb.LoginRequest{
-	// 	Login:    login,
-	// 	Password: password,
-	// }
-	// response, err := uc.client.Login(ctx, request)
-	// if err != nil {
-	// 	if e, ok := status.FromError(err); ok {
-	// 		if e.Code() == codes.NotFound {
-	// 			// сообщить ошибкой, что пользователь не найден
-	// 		} else {
-	// 			// сообщить о неизвестной ошибке
-	// 		}
-	// 	} else {
-	// 		// сообщить о неизвестной ошибке
-	// 	}
-	// }
+	// save token
+	err = uc.storage.SaveTokens(ctx, response.Token.AccessToken, response.Token.RefreshToken)
+	if err != nil {
+		return err
+	}
 
-	// todo save token
-
+	return nil
 }
 
 func (uc *Usecase) Logout(ctx context.Context) error {
+	// TODO set acceess token
+	_, rt, err := uc.storage.GetTokens()
+	if err != nil {
+		return err
+	}
+
+	request := &pb.LogoutRequest{
+		RefreshToken: rt,
+	}
+	_, err = uc.client.Logout(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	err = uc.storage.RemoveTokens()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -72,7 +92,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 	if err != nil {
 		return err
 	}
-	
+
 	err = uc.storage.SaveTokens(ctx, response.Token.AccessToken, response.Token.RefreshToken)
 	if err != nil {
 		return err

@@ -59,6 +59,10 @@ func (s *Storage) GetTokens() (at string, rt string, err error) {
 	return tf.AccessToken, tf.RefreshToken, nil
 }
 
+func (s *Storage) RemoveTokens() error {
+	return os.Remove(s.getTokensPath())
+}
+
 func (s *Storage) SaveData(ctx context.Context, fileName string, data []byte) error {
 	err := os.WriteFile(s.getDataPathWithName(fileName), data, os.ModePerm)
 	if err != nil {
