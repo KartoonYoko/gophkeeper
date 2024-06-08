@@ -31,8 +31,8 @@ func New() (*Storage, error) {
 	return s, nil
 }
 
-func (s *Storage) SaveTokens(ctx context.Context, at string, rt string) error {
-	b, err := json.Marshal(tokensFile{at, rt})
+func (s *Storage) SaveTokens(ctx context.Context, at string, rt string, sk string) error {
+	b, err := json.Marshal(tokensFile{at, rt, sk})
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (s *Storage) GetTokens() (at string, rt string, err error) {
 		return ``, ``, err
 	}
 
-	tf := &tokensFile{at, rt}
+	tf := &tokensFile{at, rt, ``}
 	err = json.Unmarshal(b, tf)
 	if err != nil {
 		return ``, ``, err
