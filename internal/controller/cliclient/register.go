@@ -9,7 +9,6 @@ import (
 )
 
 var (
-	// флаги
 	flagRegisterLogin    string
 	flagRegisterPassword string
 )
@@ -32,6 +31,7 @@ var registerCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
+		var flagRegisterLogin, flagRegisterPassword string
 		ctx := cmd.Context()
 
 		err = cmd.MarkFlagRequired("login")
@@ -87,7 +87,7 @@ func promptGetInput(pc promptContent) (string, error) {
 		Label:     pc.label,
 		Templates: templates,
 		Validate:  validate,
-		Mask:     '*',
+		Mask:      '*',
 	}
 
 	result, err := prompt.Run()
