@@ -1,11 +1,23 @@
 package cliclient
 
-import "context"
+import (
+	"context"
 
-type Controller struct{}
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientauth"
+)
 
-func New() *Controller {
-	return new(Controller)
+type Controller struct{
+	ucauth *clientauth.Usecase
+}
+
+var controller Controller
+
+func New(ucauth *clientauth.Usecase) *Controller {
+	controller = Controller{
+		ucauth: ucauth,
+	}
+
+	return &controller
 }
 
 func (c *Controller) Serve(ctx context.Context) error {

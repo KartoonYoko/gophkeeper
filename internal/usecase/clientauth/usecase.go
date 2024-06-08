@@ -64,6 +64,19 @@ func (uc *Usecase) Logout(ctx context.Context) error {
 }
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) error {
+	request := &pb.RegisterRequest{
+		Login:    login,
+		Password: password,
+	}
+	response, err := uc.client.Register(ctx, request)
+	if err != nil {
+		return err
+	}
 	
+	err = uc.storage.SaveTokens(ctx, response.Token.AccessToken, response.Token.RefreshToken)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
