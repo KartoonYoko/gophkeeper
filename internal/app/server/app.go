@@ -1,7 +1,7 @@
 /*
-Package app пакет для запуска приложения
+Package server пакет для запуска серверного приложения
 */
-package app
+package server
 
 import (
 	"context"

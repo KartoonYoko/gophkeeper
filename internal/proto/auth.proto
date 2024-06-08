@@ -18,6 +18,7 @@ message LoginRequest {
 
 message LoginResponse {
     Token token = 1;
+    string secret_key = 2;
 }
 
 message LogoutRequest {
