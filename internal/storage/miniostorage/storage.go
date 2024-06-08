@@ -38,6 +38,18 @@ func NewStorage(conf Config) (*Storage, error) {
 func (s *Storage) SaveData(ctx context.Context, request *filestoremodel.SaveDataRequestModel) (*filestoremodel.SaveDataResponseModel, error) {
 	contentType := "application/octet-stream"
 
+	bucketName := request.UserID
+	isExists, err := s.client.BucketExists(ctx, bucketName)
+	if err != nil {
+		return nil, err
+	}
+	if !isExists {
+		err = s.client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	objName, err := s.generateDataKey()
 	if err != nil {
 		return nil, err
@@ -45,7 +57,7 @@ func (s *Storage) SaveData(ctx context.Context, request *filestoremodel.SaveData
 	reader := bytes.NewReader(request.Data)
 	_, err = s.client.PutObject(
 		ctx,
-		request.UserID,
+		bucketName,
 		objName,
 		reader,
 		int64(len(request.Data)),

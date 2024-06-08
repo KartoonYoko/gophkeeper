@@ -55,6 +55,7 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 
 	rsd := &smodel.SaveDataRequestModel{
 		BinaryID:    sfr.ID,
+		UserID:      request.UserID,
 		Description: request.Description,
 		DataType:    request.DataType.String(),
 	}
