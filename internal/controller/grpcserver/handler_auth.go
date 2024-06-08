@@ -43,6 +43,7 @@ func (c *Controller) Login(ctx context.Context, request *pb.LoginRequest) (*pb.L
 			AccessToken:  accessToken,
 			RefreshToken: result.RefreshToken,
 		},
+		SecretKey: result.SecretKey,
 	}, nil
 }
 
@@ -113,5 +114,6 @@ func (c *Controller) Register(ctx context.Context, request *pb.RegisterRequest) 
 			AccessToken:  accessToken,
 			RefreshToken: result.RefreshToken,
 		},
+		SecretKey: result.SecretKey,
 	}, nil
 }

@@ -30,8 +30,9 @@ type GetRefreshTokenResponseModel struct {
 }
 
 type GetUserByLoginResponseModel struct {
-	UserID   string
-	Password string
+	UserID    string
+	Password  string
+	SecretKey string
 }
 
 type CreateRefreshTokenRequestModel struct {

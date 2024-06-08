@@ -42,6 +42,7 @@ message RegisterRequest {
 
 message RegisterResponse {
     Token token = 1;
+    string secret_key = 2;
 }
 
 message Token {

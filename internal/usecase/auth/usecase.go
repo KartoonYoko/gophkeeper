@@ -79,9 +79,14 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 		return nil, fmt.Errorf("failed create refresh token: %w", err)
 	}
 
+	secretkey, err := uc.secretkeyHandler.Decrypt(sc)
+	if err != nil {
+		return nil, fmt.Errorf("failed decrypt secret key: %w", err)
+	}
 	response := &model.RegisterResponseModel{
 		RefreshToken: rt,
 		UserID:       userID,
+		SecretKey: secretkey,
 	}
 
 	return response, nil
@@ -125,6 +130,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 	resModel := new(model.LoginResponseModel)
 	resModel.UserID = getUserResponse.UserID
 	resModel.RefreshToken = tokenID
+	resModel.SecretKey = getUserResponse.SecretKey
 
 	return resModel, nil
 }

@@ -16,9 +16,9 @@ import (
 func (s *Storage) GetUserByLogin(
 	ctx context.Context,
 	login string) (*model.GetUserByLoginResponseModel, error) {
-	var userID, password string
-	query := `SELECT id, password FROM users WHERE login = $1`
-	err := s.pool.QueryRow(ctx, query, login).Scan(&userID, &password)
+	var userID, password, secretkey string
+	query := `SELECT id, password, secret_key FROM users WHERE login = $1`
+	err := s.pool.QueryRow(ctx, query, login).Scan(&userID, &password, &secretkey)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, serror.NewLoginNotFoundError(login)
@@ -29,6 +29,7 @@ func (s *Storage) GetUserByLogin(
 	res := &model.GetUserByLoginResponseModel{
 		UserID:   userID,
 		Password: password,
+		SecretKey: secretkey,
 	}
 
 	return res, nil
