@@ -18,7 +18,8 @@ func Run() {
 	var err error
 	// todo собрать приложение
 	ctx := context.Background()
-	tokenstore, err = clientstorage.New()
+	
+	tokenstore, err = clientstorage.New(ctx)
 	if err != nil {
 		log.Fatalf("failed init store: %v", err)
 	}

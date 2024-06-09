@@ -19,6 +19,7 @@ message LoginRequest {
 message LoginResponse {
     Token token = 1;
     string secret_key = 2;
+    string user_id = 3;
 }
 
 message LogoutRequest {
@@ -43,6 +44,7 @@ message RegisterRequest {
 message RegisterResponse {
     Token token = 1;
     string secret_key = 2;
+    string user_id = 3;
 }
 
 message Token {

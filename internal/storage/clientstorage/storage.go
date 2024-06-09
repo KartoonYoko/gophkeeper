@@ -2,41 +2,72 @@ package clientstorage
 
 import (
 	"context"
-	"os"
 	"encoding/json"
+	"fmt"
+	"os"
+
+	"database/sql"
+
+	_ "modernc.org/sqlite"
 )
 
 type Storage struct {
+	dbName string
+	db     *sql.DB
+
 	rootPath string
 
 	tokensFileName string
 }
 
-func New() (*Storage, error) {
+func New(ctx context.Context) (*Storage, error) {
 	s := new(Storage)
+
+	// инициализируем директорию для хранения данных
 	hd, err := os.UserHomeDir()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable get user home directory: %w", err)
 	}
-
 	rootPath := hd + string(os.PathSeparator) + ".gophkeeper"
 	err = os.MkdirAll(rootPath, os.ModePerm)
 	if err != nil {
+		return nil, fmt.Errorf("unable create root directory: %w", err)
+	}
+
+	// инициализируем БД
+	dbName := "data.s3db"
+	s.dbName = dbName
+	db, err := sql.Open("sqlite", s.getDBPath())
+	if err != nil {
 		return nil, err
 	}
-	
+	err = db.PingContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable ping database: %w", err)
+	}
+	err = migrate(db)
+	if err != nil {
+		return nil, fmt.Errorf("unable migrate database: %w", err)
+	}
+
+	s.db = db
+	s.dbName = dbName
 	s.rootPath = rootPath
 	s.tokensFileName = "tokens.json"
 
 	return s, nil
 }
 
-func (s *Storage) SaveTokens(ctx context.Context, at string, rt string, sk string) error {
-	b, err := json.Marshal(tokensFile{at, rt, sk})
+func (s *Storage) Close() error {
+	return s.db.Close()
+}
+
+func (s *Storage) SaveCredentials(ctx context.Context, at string, rt string, sk string, userID string) error {
+	b, err := json.Marshal(credentialsFile{at, rt, sk, userID})
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(s.getTokensPath(), b, os.ModePerm)
+	err = os.WriteFile(s.getTokensPath(), b, 0600)
 	if err != nil {
 		return err
 	}
@@ -50,7 +81,7 @@ func (s *Storage) GetTokens() (at string, rt string, err error) {
 		return ``, ``, err
 	}
 
-	tf := &tokensFile{at, rt, ``}
+	tf := &credentialsFile{at, rt, ``, ``}
 	err = json.Unmarshal(b, tf)
 	if err != nil {
 		return ``, ``, err
@@ -63,8 +94,44 @@ func (s *Storage) RemoveTokens() error {
 	return os.Remove(s.getTokensPath())
 }
 
-func (s *Storage) SaveData(ctx context.Context, fileName string, data []byte) error {
-	err := os.WriteFile(s.getDataPathWithName(fileName), data, os.ModePerm)
+func (s *Storage) GetSecretKey() (sc string, err error) {
+	b, err := os.ReadFile(s.getTokensPath())
+	if err != nil {
+		return ``, err
+	}
+
+	tf := &credentialsFile{``, ``, sc, ``}
+	err = json.Unmarshal(b, tf)
+	if err != nil {
+		return ``, err
+	}
+
+	return tf.SecretKey, nil
+}
+
+func (s *Storage) GetUserID() (userID string, err error) {
+	b, err := os.ReadFile(s.getTokensPath())
+	if err != nil {
+		return ``, err
+	}
+
+	tf := &credentialsFile{``, ``, ``, userID}
+	err = json.Unmarshal(b, tf)
+	if err != nil {
+		return ``, err
+	}
+
+	return tf.UserID, nil
+}
+
+func (s *Storage) SaveData(ctx context.Context, request SaveDataRequestModel) error {
+	err := os.WriteFile(s.getDataPathWithName(request.Filename), request.Data, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	query := `INSERT INTO data_store (id, user_id, description, data_type) VALUES (?, ?, ?, ?)`
+	_, err = s.db.ExecContext(ctx, query, request.Filename, request.Userid, request.Description, request.Datatype)
 	if err != nil {
 		return err
 	}
@@ -74,6 +141,10 @@ func (s *Storage) SaveData(ctx context.Context, fileName string, data []byte) er
 
 func (s *Storage) getTokensPath() string {
 	return s.rootPath + string(os.PathSeparator) + s.tokensFileName
+}
+
+func (s *Storage) getDBPath() string {
+	return s.dbName
 }
 
 func (s *Storage) getDataPathWithName(filename string) string {

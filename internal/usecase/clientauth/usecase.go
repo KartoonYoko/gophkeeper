@@ -51,7 +51,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) err
 	}
 
 	// save token
-	err = uc.storage.SaveTokens(ctx, response.Token.AccessToken, response.Token.RefreshToken, response.SecretKey)
+	err = uc.storage.SaveCredentials(ctx, response.Token.AccessToken, response.Token.RefreshToken, response.SecretKey, response.UserId)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 		return err
 	}
 
-	err = uc.storage.SaveTokens(ctx, response.Token.AccessToken, response.Token.RefreshToken, response.SecretKey)
+	err = uc.storage.SaveCredentials(ctx, response.Token.AccessToken, response.Token.RefreshToken, response.SecretKey, response.UserId)
 	if err != nil {
 		return err
 	}
