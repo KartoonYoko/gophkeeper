@@ -34,6 +34,16 @@ type GetDataListToSynchronizeItemModel struct {
 	ModificationTimestamp int64
 }
 
+type GetDataByIDResponseModel struct {
+	ID                    string
+	Userid                string
+	Description           string
+	Datatype              string
+	Hash                  string
+	ModificationTimestamp int64
+	Data                  []byte
+}
+
 type credentialsFile struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`

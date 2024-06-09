@@ -7,10 +7,28 @@ option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
 // StoreService сервис для хранения приватных данных
 service StoreService {
     rpc SaveData (SaveDataRequest) returns (SaveDataResponse);
+    rpc UpdateData (UpdateDataRequest) returns (UpdateDataResponse);
+    rpc RemoveData (RemoveDataRequest) returns (RemoveDataResponse);
     rpc GetDataByID (GetDataByIDRequest) returns (GetDataByIDResponse);
 
     rpc GetMetaDataList(GetMetaDataListRequest) returns (GetMetaDataListResponse);
 }
+
+message RemoveDataRequest {
+    string id = 1;
+}
+
+message RemoveDataResponse {}
+
+message UpdateDataRequest {
+    string id = 1;
+    string hash = 2;
+    int64 modification_timestamp = 3;
+    
+    bytes data = 4;
+}
+
+message UpdateDataResponse {}
 
 message GetMetaDataListRequest {}
 
@@ -56,5 +74,7 @@ message GetDataByIDResponse {
     DataTypeEnum type = 1;
     string description = 2;
     string hash = 3;
-    bytes data = 4;
+    int64 modification_timestamp = 4;
+    
+    bytes data = 5;
 }

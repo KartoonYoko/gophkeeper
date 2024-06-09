@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	StoreService_SaveData_FullMethodName        = "/proto.StoreService/SaveData"
+	StoreService_UpdateData_FullMethodName      = "/proto.StoreService/UpdateData"
+	StoreService_RemoveData_FullMethodName      = "/proto.StoreService/RemoveData"
 	StoreService_GetDataByID_FullMethodName     = "/proto.StoreService/GetDataByID"
 	StoreService_GetMetaDataList_FullMethodName = "/proto.StoreService/GetMetaDataList"
 )
@@ -29,6 +31,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StoreServiceClient interface {
 	SaveData(ctx context.Context, in *SaveDataRequest, opts ...grpc.CallOption) (*SaveDataResponse, error)
+	UpdateData(ctx context.Context, in *UpdateDataRequest, opts ...grpc.CallOption) (*UpdateDataResponse, error)
+	RemoveData(ctx context.Context, in *RemoveDataRequest, opts ...grpc.CallOption) (*RemoveDataResponse, error)
 	GetDataByID(ctx context.Context, in *GetDataByIDRequest, opts ...grpc.CallOption) (*GetDataByIDResponse, error)
 	GetMetaDataList(ctx context.Context, in *GetMetaDataListRequest, opts ...grpc.CallOption) (*GetMetaDataListResponse, error)
 }
@@ -44,6 +48,24 @@ func NewStoreServiceClient(cc grpc.ClientConnInterface) StoreServiceClient {
 func (c *storeServiceClient) SaveData(ctx context.Context, in *SaveDataRequest, opts ...grpc.CallOption) (*SaveDataResponse, error) {
 	out := new(SaveDataResponse)
 	err := c.cc.Invoke(ctx, StoreService_SaveData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storeServiceClient) UpdateData(ctx context.Context, in *UpdateDataRequest, opts ...grpc.CallOption) (*UpdateDataResponse, error) {
+	out := new(UpdateDataResponse)
+	err := c.cc.Invoke(ctx, StoreService_UpdateData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storeServiceClient) RemoveData(ctx context.Context, in *RemoveDataRequest, opts ...grpc.CallOption) (*RemoveDataResponse, error) {
+	out := new(RemoveDataResponse)
+	err := c.cc.Invoke(ctx, StoreService_RemoveData_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +95,8 @@ func (c *storeServiceClient) GetMetaDataList(ctx context.Context, in *GetMetaDat
 // for forward compatibility
 type StoreServiceServer interface {
 	SaveData(context.Context, *SaveDataRequest) (*SaveDataResponse, error)
+	UpdateData(context.Context, *UpdateDataRequest) (*UpdateDataResponse, error)
+	RemoveData(context.Context, *RemoveDataRequest) (*RemoveDataResponse, error)
 	GetDataByID(context.Context, *GetDataByIDRequest) (*GetDataByIDResponse, error)
 	GetMetaDataList(context.Context, *GetMetaDataListRequest) (*GetMetaDataListResponse, error)
 	mustEmbedUnimplementedStoreServiceServer()
@@ -84,6 +108,12 @@ type UnimplementedStoreServiceServer struct {
 
 func (UnimplementedStoreServiceServer) SaveData(context.Context, *SaveDataRequest) (*SaveDataResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveData not implemented")
+}
+func (UnimplementedStoreServiceServer) UpdateData(context.Context, *UpdateDataRequest) (*UpdateDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateData not implemented")
+}
+func (UnimplementedStoreServiceServer) RemoveData(context.Context, *RemoveDataRequest) (*RemoveDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveData not implemented")
 }
 func (UnimplementedStoreServiceServer) GetDataByID(context.Context, *GetDataByIDRequest) (*GetDataByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDataByID not implemented")
@@ -118,6 +148,42 @@ func _StoreService_SaveData_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(StoreServiceServer).SaveData(ctx, req.(*SaveDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StoreService_UpdateData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StoreServiceServer).UpdateData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StoreService_UpdateData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StoreServiceServer).UpdateData(ctx, req.(*UpdateDataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StoreService_RemoveData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveDataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StoreServiceServer).RemoveData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StoreService_RemoveData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StoreServiceServer).RemoveData(ctx, req.(*RemoveDataRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -168,6 +234,14 @@ var StoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveData",
 			Handler:    _StoreService_SaveData_Handler,
+		},
+		{
+			MethodName: "UpdateData",
+			Handler:    _StoreService_UpdateData_Handler,
+		},
+		{
+			MethodName: "RemoveData",
+			Handler:    _StoreService_RemoveData_Handler,
 		},
 		{
 			MethodName: "GetDataByID",

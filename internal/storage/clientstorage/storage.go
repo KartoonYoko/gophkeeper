@@ -169,6 +169,31 @@ func (s *Storage) GetDataList(ctx context.Context, userID string) ([]GetDataList
 	return items, nil
 }
 
+func (s *Storage) GetDataByID(ctx context.Context, id string) (*GetDataByIDResponseModel, error) {
+	b, err := os.ReadFile(s.getDataPathWithName(id))
+	if err != nil {
+		return nil, err
+	}
+
+	res := &GetDataByIDResponseModel{
+		Data: b,
+	}
+
+	query := `SELECT id, user_id, description, data_type, hash, modification_timestamp FROM data_store WHERE id = ?`
+	err = s.db.QueryRowContext(ctx, query, id).Scan(
+		&res.ID,
+		&res.Description,
+		&res.Datatype,
+		&res.Hash,
+		&res.ModificationTimestamp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func (s *Storage) GetDataListToSynchronize(ctx context.Context, userID string) ([]GetDataListToSynchronizeItemModel, error) {
 	query := `
 	SELECT id, user_id, description, data_type, hash, modification_timestamp, is_deleted

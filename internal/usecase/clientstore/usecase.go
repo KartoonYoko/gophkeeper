@@ -154,12 +154,12 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		remoteDataDict[item.Id] = item
 	}
 
-	idsToDeleteLocal := make([]string, 0)
-	idsToDeleteRemote := make([]string, 0)
-	idsToAddLocal := make([]string, 0)
-	idsToAddRemote := make([]string, 0)
-	idsToUpdateLocal := make([]string, 0)
-	idsToUpdateRemote := make([]string, 0)
+	idsToDeleteLocal := make([]string, 0)  // удалить локально
+	idsToDeleteRemote := make([]string, 0) // удалить на сервере
+	idsToAddLocal := make([]string, 0)     // добавить локально
+	idsToAddRemote := make([]string, 0)    // добавить на сервере
+	idsToUpdateLocal := make([]string, 0)  // обновить локально
+	idsToUpdateRemote := make([]string, 0) // обновить на сервере
 
 	for _, item := range localLst {
 		// запоминаю те, которые помечены удалёнными на клиенте, но не на сервере (3)
@@ -212,9 +212,92 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		}
 	}
 
-	// обрабатываю полученные списки
-	// TODO написать функции обновления/удаления данных
+	// обработка полученных списков
+	for _, id := range idsToDeleteLocal {
+		err = uc.storage.RemoveDataByID(ctx, id)
+		if err != nil {
+			return err
+		}
+	}
+	for _, id := range idsToDeleteRemote {
+		_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{Id: id})
+		if err != nil {
+			return err
+		}
+	}
+	for _, id := range idsToAddLocal {
+		// get data by id
+		rd, err := uc.client.GetDataByID(ctx, &pb.GetDataByIDRequest{Id: id})
+		if err != nil {
+			return err
+		}
+		r := clientstorage.SaveDataRequestModel{
+			ID:                    id,
+			Userid:                userID,
+			Description:           rd.Description,
+			Datatype:              getDataTypeStringFromPB(rd.Type),
+			Hash:                  rd.Hash,
+			ModificationTimestamp: rd.ModificationTimestamp,
+			Data:                  rd.Data,
+		}
+		err = uc.storage.SaveData(ctx, r)
+		if err != nil {
+			return err
+		}
+	}
+	for _, id := range idsToAddRemote {
+		item, err := uc.storage.GetDataByID(ctx, id)
+		if err != nil {
+			return err
+		}
+		r := &pb.SaveDataRequest{
+			Id:                    item.ID,
+			Description:           item.Description,
+			Type:                  getPBDataTypeFromString(item.Datatype),
+			Hash:                  item.Hash,
+			ModificationTimestamp: item.ModificationTimestamp,
+			Data:                  item.Data,
+		}
+		_, err = uc.client.SaveData(ctx, r)
+		if err != nil {
+			return err
+		}
+	}
+	for _, id := range idsToUpdateLocal {
+		res, err := uc.client.GetDataByID(ctx, &pb.GetDataByIDRequest{Id: id})
+		if err != nil {
+			return err
+		}
 
+		r := clientstorage.UpdateDataRequestModel{
+			ID:                    id,
+			Hash:                  res.Hash,
+			ModificationTimestamp: res.ModificationTimestamp,
+			Data:                  res.Data,
+		}
+
+		err = uc.storage.UpdateData(ctx, r)
+		if err != nil {
+			return err
+		}
+	}
+	for _, id := range idsToUpdateRemote {
+		res, err := uc.storage.GetDataByID(ctx, id)
+		if err != nil {
+			return err
+		}
+
+		r := &pb.UpdateDataRequest{
+			Id:                    res.ID,
+			Hash:                  res.Hash,
+			ModificationTimestamp: res.ModificationTimestamp,
+			Data:                  res.Data,
+		}
+		_, err = uc.client.UpdateData(ctx, r)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -259,4 +342,19 @@ func getPBDataTypeFromString(str string) pb.DataTypeEnum {
 	}
 
 	return pb.DataTypeEnum_DATA_TYPE_TEXT
+}
+
+func getDataTypeStringFromPB(dt pb.DataTypeEnum) string {
+	switch dt {
+	case pb.DataTypeEnum_DATA_TYPE_CREDENTIALS:
+		return "CREDENTIALS"
+	case pb.DataTypeEnum_DATA_TYPE_TEXT:
+		return "TEXT"
+	case pb.DataTypeEnum_DATA_TYPE_BINARY:
+		return "BINARY"
+	case pb.DataTypeEnum_DATA_TYPE_BANK_CARD:
+		return "BANK_CARD"
+	}
+
+	return "TEXT"
 }
