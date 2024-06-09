@@ -23,6 +23,8 @@ message GetMetaDataListItemResponse {
     string description = 2;
     DataTypeEnum type = 3;
     string hash = 4;
+    int64 modification_timestamp = 5;
+    bool is_deleted = 6;
 }
 
 message SaveDataRequest {

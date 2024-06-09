@@ -121,7 +121,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	// 		- запоминаю те, которые помечены удалёнными на сервере, но не на клиенте (6)
 	// 		- запоминаю те, которых нет на сервере (1)
 	// 		- запоминаю те, которые есть на сервере, но не на клиенте (4)
-	// 		- запоминаю те, у кого не совпал хеш и дата модификации меньше, чем локльно (2)
+	// 		- запоминаю те, у кого не совпал хеш и дата модификации меньше, чем локально (2)
 	// 		- запоминаю те, у кого не совпал хеш и дата модификации больше, чем локльно (5)
 	//
 	// - обрабатываю полученные списки
@@ -160,6 +160,57 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	idsToAddRemote := make([]string, 0)
 	idsToUpdateLocal := make([]string, 0)
 	idsToUpdateRemote := make([]string, 0)
+
+	for _, item := range localLst {
+		// запоминаю те, которые помечены удалёнными на клиенте, но не на сервере (3)
+		if item.IsDeleted {
+			if ritem, ok := remoteDataDict[item.ID]; ok {
+				if !ritem.IsDeleted {
+					idsToDeleteRemote = append(idsToDeleteRemote, item.ID)
+				}
+			}
+
+			continue
+		}
+
+		// запоминаю те, которых нет на сервере (1)
+		ritem, ok := remoteDataDict[item.ID];
+		if !ok {
+			idsToAddRemote = append(idsToAddRemote, item.ID)
+			continue
+		}
+
+		// запоминаю те, у кого не совпал хеш и дата модификации больше, чем локльно (5)
+		if ritem.Hash != item.Hash {
+			if ritem.ModificationTimestamp >= item.ModificationTimestamp {
+				idsToUpdateLocal = append(idsToUpdateLocal, item.ID)
+			}
+		}
+	}
+
+	for _, ritem := range remoteLst.Items {
+		// запоминаю те, которые помечены удалёнными на сервере, но не на клиенте (6)
+		if ritem.IsDeleted {
+			if litem, ok := localDataDict[ritem.Id]; ok {
+				if !litem.IsDeleted {
+					idsToDeleteLocal = append(idsToDeleteLocal, litem.ID)
+				}
+			}
+			continue
+		}
+		// запоминаю те, которые есть на сервере, но не на клиенте (4)
+		item, ok := localDataDict[ritem.Id]
+		if !ok {
+			idsToAddLocal = append(idsToAddLocal, ritem.Id)
+			continue
+		}
+		// запоминаю те, у кого не совпал хеш и дата модификации меньше, чем локально (2)
+		if ritem.Hash != item.Hash {
+			if ritem.ModificationTimestamp < item.ModificationTimestamp {
+				idsToUpdateRemote = append(idsToUpdateRemote, ritem.Id)
+			}
+		}
+	}
 
 	return nil
 }
