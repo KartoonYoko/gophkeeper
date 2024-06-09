@@ -8,7 +8,7 @@ func init() {
 
 var dataGetListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "",
+	Short: "Get list of all data.",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
