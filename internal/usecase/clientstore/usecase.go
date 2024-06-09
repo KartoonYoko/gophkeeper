@@ -51,7 +51,7 @@ func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
 
 	// пробуем сохранить локально
 	r := clientstorage.SaveDataRequestModel{
-		Filename:              id,
+		ID:                    id,
 		Userid:                userID,
 		Description:           "",
 		Datatype:              "TEXT",
@@ -66,7 +66,7 @@ func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
 
 	// сохраняем удалённо
 	rr := &pb.SaveDataRequest{
-		Id:                    r.Filename,
+		Id:                    r.ID,
 		Description:           r.Description,
 		Type:                  getPBDataTypeFromString(r.Datatype),
 		Data:                  r.Data,
@@ -174,7 +174,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		}
 
 		// запоминаю те, которых нет на сервере (1)
-		ritem, ok := remoteDataDict[item.ID];
+		ritem, ok := remoteDataDict[item.ID]
 		if !ok {
 			idsToAddRemote = append(idsToAddRemote, item.ID)
 			continue
@@ -211,6 +211,9 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 			}
 		}
 	}
+
+	// обрабатываю полученные списки
+	// TODO написать функции обновления/удаления данных
 
 	return nil
 }

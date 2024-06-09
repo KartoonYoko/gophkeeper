@@ -1,10 +1,17 @@
 package clientstorage
 
 type SaveDataRequestModel struct {
-	Filename              string
+	ID                    string
 	Userid                string
 	Description           string
 	Datatype              string
+	Hash                  string
+	ModificationTimestamp int64
+	Data                  []byte
+}
+
+type UpdateDataRequestModel struct {
+	ID                    string
 	Hash                  string
 	ModificationTimestamp int64
 	Data                  []byte

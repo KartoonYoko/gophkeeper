@@ -125,14 +125,14 @@ func (s *Storage) GetUserID() (userID string, err error) {
 }
 
 func (s *Storage) SaveData(ctx context.Context, request SaveDataRequestModel) error {
-	err := os.WriteFile(s.getDataPathWithName(request.Filename), request.Data, os.ModePerm)
+	err := os.WriteFile(s.getDataPathWithName(request.ID), request.Data, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
 	query := `INSERT INTO data_store (id, user_id, description, data_type, hash, modification_timestamp) VALUES (?, ?, ?, ?, ?, ?)`
 	_, err = s.db.ExecContext(ctx, query,
-		request.Filename,
+		request.ID,
 		request.Userid,
 		request.Description,
 		request.Datatype,
@@ -197,6 +197,43 @@ func (s *Storage) GetDataListToSynchronize(ctx context.Context, userID string) (
 	return items, nil
 }
 
+func (s *Storage) UpdateData(ctx context.Context, request UpdateDataRequestModel) error {
+	// - создать новый файл с названием: ID + суффикс нового файла
+	// - удалить старый файл
+	// - переименовать новый
+	// - обновить данные в БД
+	err := os.WriteFile(s.getNewDataPathWithName(request.ID), request.Data, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	err = os.Remove(s.getDataPathWithName(request.ID))
+	if err != nil {
+		return err
+	}
+	err = os.Rename(s.getNewDataPathWithName(request.ID), s.getDataPathWithName(request.ID))
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE data_store SET hash=?, modification_timestamp=? WHERE id = ?`
+	_, err = s.db.ExecContext(ctx, query, request.Hash, request.ModificationTimestamp, request.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Storage) RemoveDataByID(ctx context.Context, id string) error {
+	query := `UPDATE data_store SET is_deleted=1 WHERE id = ?`
+	_, err := s.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(s.getDataPathWithName(id))
+}
+
 func (s *Storage) getTokensPath() string {
 	return s.rootPath + string(os.PathSeparator) + s.tokensFileName
 }
@@ -205,6 +242,12 @@ func (s *Storage) getDBPath() string {
 	return s.dbName
 }
 
+// getDataPathWithName возвращает путь до файла с указанным именем
 func (s *Storage) getDataPathWithName(filename string) string {
 	return s.rootPath + string(os.PathSeparator) + filename
+}
+
+// getNewDataPathWithName возвращает путь до файла предназначенного для замены старого с указанным именем
+func (s *Storage) getNewDataPathWithName(filename string) string {
+	return s.rootPath + string(os.PathSeparator) + filename + "_new"
 }
