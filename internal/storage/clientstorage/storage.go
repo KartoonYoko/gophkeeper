@@ -182,6 +182,7 @@ func (s *Storage) GetDataByID(ctx context.Context, id string) (*GetDataByIDRespo
 	query := `SELECT id, user_id, description, data_type, hash, modification_timestamp FROM data_store WHERE id = ?`
 	err = s.db.QueryRowContext(ctx, query, id).Scan(
 		&res.ID,
+		&res.Userid,
 		&res.Description,
 		&res.Datatype,
 		&res.Hash,

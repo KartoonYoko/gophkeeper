@@ -29,7 +29,7 @@ func New(conn *grpc.ClientConn, store *clientstorage.Storage) *Usecase {
 }
 
 // CreateTextData сохраняет текстовые данные
-// 
+//
 // TODO: обернуть обращение к серверу, чтобы выводить в этом случае не ошибку, а предупреждение, что сервер не досутпен, но данные сохранены локально
 func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
 	// - шифрую данные и работаю далее только с шифрованными данными
@@ -105,6 +105,25 @@ func (uc *Usecase) GetDataList(ctx context.Context) ([]clientstorage.GetDataList
 	}
 
 	return uc.storage.GetDataList(ctx, userid)
+}
+
+func (uc *Usecase) GetDataByID(ctx context.Context, id string) (*clientstorage.GetDataByIDResponseModel, error) {
+	res, err := uc.storage.GetDataByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return nil, err
+	}
+
+	res.Data, err = cipher.Decrypt(res.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // Synchronize синхронизирует данные с сервером
