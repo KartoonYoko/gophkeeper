@@ -9,13 +9,18 @@ import (
 
 func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.SaveDataResponseModel, error) {
 	query := `
-	INSERT INTO "store"."data" (user_id, binary_id, description, data_type)
-	VALUES ($1, $2, $3, $4)
+	INSERT INTO "store"."data" (user_id, binary_id, description, data_type, id)
+	VALUES ($1, $2, $3, $4, $5)
 	RETURNING "id";
 	`
 
-	var id int
-	err := s.pool.QueryRow(ctx, query, request.UserID, request.BinaryID, request.Description, request.DataType).Scan(&id)
+	var id string
+	err := s.pool.QueryRow(ctx, query, 
+		request.UserID, 
+		request.BinaryID, 
+		request.Description, 
+		request.DataType,
+		request.ID).Scan(&id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save data: %w", err)
 	}
@@ -27,8 +32,7 @@ func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestMo
 }
 
 func (s *Storage) GetDataByID(ctx context.Context, request *model.GetDataByIDRequestModel) (*model.GetDataByIDResponseModel, error) {
-	var id int
-	var userID, binaryID, description, dataType string
+	var id, userID, binaryID, description, dataType string
 
 	query := `
 	SELECT * FROM "store"."data" WHERE "id" = $1 AND "user_id" = $2

@@ -52,7 +52,7 @@ func (c *Controller) GetDataByID(ctx context.Context, r *pb.GetDataByIDRequest) 
 	
 	request := &ucmodel.GetDataByIDRequestModel{
 		UserID: userID,
-		ID: int(r.Id),
+		ID: r.Id,
 	}
 	getDataResponse, err := c.usecaseStore.GetDataByID(ctx, request)
 	if err != nil {

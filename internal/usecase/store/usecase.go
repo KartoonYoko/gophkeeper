@@ -45,6 +45,7 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 
 	encryptedData := uc.dataCipherHandler.Encrypt(request.Data)
 	r := &sfmodel.SaveDataRequestModel{
+		ID:     request.ID,
 		Data:   encryptedData,
 		UserID: request.UserID,
 	}

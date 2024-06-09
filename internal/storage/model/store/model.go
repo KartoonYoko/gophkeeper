@@ -1,6 +1,7 @@
 package store
 
 type SaveDataRequestModel struct {
+	ID          string
 	UserID      string
 	BinaryID    string
 	Description string
@@ -8,16 +9,16 @@ type SaveDataRequestModel struct {
 }
 
 type SaveDataResponseModel struct {
-	ID int
+	ID string
 }
 
 type GetDataByIDRequestModel struct {
 	UserID string
-	ID     int
+	ID     string
 }
 
 type GetDataByIDResponseModel struct {
-	ID          int
+	ID          string
 	UserID      string
 	BinaryID    string
 	Description string

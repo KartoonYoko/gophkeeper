@@ -1,6 +1,7 @@
 package store
 
 type SaveDataRequestModel struct {
+	ID          string
 	UserID      string
 	Data        []byte
 	DataType    DataType
@@ -8,12 +9,12 @@ type SaveDataRequestModel struct {
 }
 
 type SaveDataResponseModel struct {
-	DataID int
+	DataID string
 }
 
 type GetDataByIDRequestModel struct {
 	UserID string
-	ID     int
+	ID     string
 }
 
 type GetDataByIDResponseModel struct {

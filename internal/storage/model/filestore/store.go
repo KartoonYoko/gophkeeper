@@ -6,6 +6,7 @@ type SaveDataResponseModel struct {
 }
 
 type SaveDataRequestModel struct {
+	ID     string
 	Data   []byte
 	UserID string
 }
@@ -16,7 +17,7 @@ type GetDataByIDRequestModel struct {
 }
 
 type GetDataByIDResponseModel struct {
-	Data   []byte
+	Data []byte
 }
 
 type RemoveDataByIDRequestModel struct {

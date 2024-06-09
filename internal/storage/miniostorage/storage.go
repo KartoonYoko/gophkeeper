@@ -8,6 +8,7 @@ import (
 	"io"
 
 	filestoremodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/filestore"
+	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -50,10 +51,11 @@ func (s *Storage) SaveData(ctx context.Context, request *filestoremodel.SaveData
 		}
 	}
 
-	objName, err := s.generateDataKey()
-	if err != nil {
-		return nil, err
+	objName := request.ID
+	if objName == "" {
+		objName = uuid.New().String()
 	}
+	
 	reader := bytes.NewReader(request.Data)
 	_, err = s.client.PutObject(
 		ctx,
