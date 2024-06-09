@@ -39,7 +39,34 @@ func promptPasswordInput(pc promptContent) (string, error) {
 		return "", fmt.Errorf("prompt failed: %w", err)
 	}
 
-	fmt.Println("")
+	return result, nil
+}
+
+func promptTextInput(pc promptContent) (string, error) {
+	validate := func(input string) error {
+		if len(input) <= 0 {
+			return errors.New(pc.errorMsg)
+		}
+		return nil
+	}
+
+	templates := &promptui.PromptTemplates{
+		Prompt:  "{{ . }} ",
+		Valid:   "{{ . | green }} ",
+		Invalid: "{{ . | red }} ",
+		Success: "{{ . | bold }} ",
+	}
+
+	prompt := promptui.Prompt{
+		Label:     pc.label,
+		Templates: templates,
+		Validate:  validate,
+	}
+
+	result, err := prompt.Run()
+	if err != nil {
+		return "", fmt.Errorf("prompt failed: %w", err)
+	}
 
 	return result, nil
 }

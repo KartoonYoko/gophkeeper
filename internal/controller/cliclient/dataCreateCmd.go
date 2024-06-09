@@ -19,7 +19,7 @@ var dataCreateCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
-		// ctx := cmd.Context()
+		ctx := cmd.Context()
 
 		datatype, err := cmd.Flags().GetString("datatype")
 		if err != nil {
@@ -33,7 +33,27 @@ var dataCreateCmd = &cobra.Command{
 			return
 		}
 
-		// todo usecase create
+		// todo syncrhonize
+		if dt == "TEXT" {
+			pc := promptContent{
+				errorMsg: "Please, enter text",
+				label:    "Enter text",
+			}
+			text, err := promptTextInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			err = controller.ucstore.CreateTextData(ctx, text)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+
+			cmd.Println("Text data created")
+		} else {
+			cmd.PrintErrln("Not implemented yet")
+		}
 	},
 }
 

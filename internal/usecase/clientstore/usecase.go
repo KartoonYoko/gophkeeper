@@ -29,6 +29,8 @@ func New(conn *grpc.ClientConn, store *clientstorage.Storage) *Usecase {
 }
 
 // CreateTextData сохраняет текстовые данные
+// 
+// TODO: обернуть обращение к серверу, чтобы выводить в этом случае не ошибку, а предупреждение, что сервер не досутпен, но данные сохранены локально
 func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
 	// - шифрую данные и работаю далее только с шифрованными данными
 	// - сохраняю локльно на диске (генерировать название файла, используя guid)
@@ -107,7 +109,7 @@ func (uc *Usecase) GetDataList(ctx context.Context) ([]clientstorage.GetDataList
 
 // Synchronize синхронизирует данные с сервером
 func (uc *Usecase) Synchronize(ctx context.Context) error {
-	// TODO
+	//
 	// - список ID'шников, которые нужно добавить на сервер (1)
 	// - список ID'шников, которые нужно обновить на сервере (2)
 	// - список ID'шников, которые нужно удалить на сервере (3)

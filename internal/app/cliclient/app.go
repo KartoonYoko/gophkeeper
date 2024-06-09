@@ -7,6 +7,7 @@ import (
 	"github.com/KartoonYoko/gophkeeper/internal/controller/cliclient"
 	"github.com/KartoonYoko/gophkeeper/internal/storage/clientstorage"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientauth"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -35,8 +36,9 @@ func Run() {
 
 	// usecases
 	ucauth := clientauth.New(conn, tokenstore)
+	ucstore := clientstore.New(conn, tokenstore)
 
-	controller := cliclient.New(ucauth)
+	controller := cliclient.New(ucauth, ucstore)
 
 	err = controller.Serve(ctx)
 	if err != nil {

@@ -146,7 +146,7 @@ func (s *Storage) SaveData(ctx context.Context, request SaveDataRequestModel) er
 }
 
 func (s *Storage) GetDataList(ctx context.Context, userID string) ([]GetDataListResponseItemModel, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT id, user_id, description, data_type FROM data_store WHERE user_id = ?`, userID)
+	rows, err := s.db.QueryContext(ctx, `SELECT id, user_id, description, data_type FROM data_store WHERE user_id = ? AND is_deleted = 0`, userID)
 	if err != nil {
 		return nil, err
 	}
