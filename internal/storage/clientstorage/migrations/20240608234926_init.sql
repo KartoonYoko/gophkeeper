@@ -1,10 +1,13 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS data_store (
-    id INTEGER PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
     description TEXT,
-    data_type TEXT
+    data_type TEXT,
+    hash TEXT,
+    modification_timestamp INTEGER,
+    is_deleted INTEGER DEFAULT 0
 );
 -- +goose StatementEnd
 

@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	StoreService_SaveData_FullMethodName    = "/proto.StoreService/SaveData"
-	StoreService_GetDataByID_FullMethodName = "/proto.StoreService/GetDataByID"
+	StoreService_SaveData_FullMethodName        = "/proto.StoreService/SaveData"
+	StoreService_GetDataByID_FullMethodName     = "/proto.StoreService/GetDataByID"
+	StoreService_GetMetaDataList_FullMethodName = "/proto.StoreService/GetMetaDataList"
 )
 
 // StoreServiceClient is the client API for StoreService service.
@@ -29,6 +30,7 @@ const (
 type StoreServiceClient interface {
 	SaveData(ctx context.Context, in *SaveDataRequest, opts ...grpc.CallOption) (*SaveDataResponse, error)
 	GetDataByID(ctx context.Context, in *GetDataByIDRequest, opts ...grpc.CallOption) (*GetDataByIDResponse, error)
+	GetMetaDataList(ctx context.Context, in *GetMetaDataListRequest, opts ...grpc.CallOption) (*GetMetaDataListResponse, error)
 }
 
 type storeServiceClient struct {
@@ -57,12 +59,22 @@ func (c *storeServiceClient) GetDataByID(ctx context.Context, in *GetDataByIDReq
 	return out, nil
 }
 
+func (c *storeServiceClient) GetMetaDataList(ctx context.Context, in *GetMetaDataListRequest, opts ...grpc.CallOption) (*GetMetaDataListResponse, error) {
+	out := new(GetMetaDataListResponse)
+	err := c.cc.Invoke(ctx, StoreService_GetMetaDataList_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StoreServiceServer is the server API for StoreService service.
 // All implementations must embed UnimplementedStoreServiceServer
 // for forward compatibility
 type StoreServiceServer interface {
 	SaveData(context.Context, *SaveDataRequest) (*SaveDataResponse, error)
 	GetDataByID(context.Context, *GetDataByIDRequest) (*GetDataByIDResponse, error)
+	GetMetaDataList(context.Context, *GetMetaDataListRequest) (*GetMetaDataListResponse, error)
 	mustEmbedUnimplementedStoreServiceServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedStoreServiceServer) SaveData(context.Context, *SaveDataReques
 }
 func (UnimplementedStoreServiceServer) GetDataByID(context.Context, *GetDataByIDRequest) (*GetDataByIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDataByID not implemented")
+}
+func (UnimplementedStoreServiceServer) GetMetaDataList(context.Context, *GetMetaDataListRequest) (*GetMetaDataListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMetaDataList not implemented")
 }
 func (UnimplementedStoreServiceServer) mustEmbedUnimplementedStoreServiceServer() {}
 
@@ -125,6 +140,24 @@ func _StoreService_GetDataByID_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StoreService_GetMetaDataList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMetaDataListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StoreServiceServer).GetMetaDataList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StoreService_GetMetaDataList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StoreServiceServer).GetMetaDataList(ctx, req.(*GetMetaDataListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StoreService_ServiceDesc is the grpc.ServiceDesc for StoreService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var StoreService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDataByID",
 			Handler:    _StoreService_GetDataByID_Handler,
+		},
+		{
+			MethodName: "GetMetaDataList",
+			Handler:    _StoreService_GetMetaDataList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

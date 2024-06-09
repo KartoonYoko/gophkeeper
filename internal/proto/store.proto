@@ -8,16 +8,35 @@ option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
 service StoreService {
     rpc SaveData (SaveDataRequest) returns (SaveDataResponse);
     rpc GetDataByID (GetDataByIDRequest) returns (GetDataByIDResponse);
+
+    rpc GetMetaDataList(GetMetaDataListRequest) returns (GetMetaDataListResponse);
+}
+
+message GetMetaDataListRequest {}
+
+message GetMetaDataListResponse {
+    repeated GetMetaDataListItemResponse items = 1;
+}
+
+message GetMetaDataListItemResponse {
+    string id = 1;
+    string description = 2;
+    DataTypeEnum type = 3;
+    string hash = 4;
 }
 
 message SaveDataRequest {
-    DataTypeEnum type = 1;
+    string id = 1;
     string description = 2;
-    bytes data = 3;
+    DataTypeEnum type = 3;
+    string hash = 4;
+    int64 modification_timestamp = 5;
+    
+    bytes data = 6;
 }
 
 message SaveDataResponse {
-    int32 data_id = 1;
+    string data_id = 1;
 }
 
 enum DataTypeEnum {
@@ -28,11 +47,12 @@ enum DataTypeEnum {
 }
 
 message GetDataByIDRequest {
-    int32 id = 1;
+    string id = 1;
 }
 
 message GetDataByIDResponse {
     DataTypeEnum type = 1;
     string description = 2;
-    bytes data = 3;
+    string hash = 3;
+    bytes data = 4;
 }

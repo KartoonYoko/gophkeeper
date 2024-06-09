@@ -1,11 +1,30 @@
 package clientstorage
 
 type SaveDataRequestModel struct {
-	Filename    string
-	Userid      string
+	Filename              string
+	Userid                string
+	Description           string
+	Datatype              string
+	Hash                  string
+	ModificationTimestamp int64
+	Data                  []byte
+}
+
+type GetDataListResponseItemModel struct {
+	ID          string
+	UserID      string
 	Description string
 	Datatype    string
-	Data        []byte
+}
+
+type GetDataListToSynchronizeItemModel struct {
+	ID                    string
+	UserID                string
+	Description           string
+	Datatype              string
+	Hash                  string
+	IsDeleted             bool
+	ModificationTimestamp int64
 }
 
 type credentialsFile struct {

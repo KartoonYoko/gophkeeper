@@ -38,7 +38,7 @@ func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.S
 	}
 
 	response := new(pb.SaveDataResponse)
-	response.DataId = int32(saveDataResponse.DataID)
+	response.DataId = saveDataResponse.DataID
 
 	return response, nil
 }

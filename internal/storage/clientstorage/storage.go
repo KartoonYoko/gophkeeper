@@ -130,13 +130,71 @@ func (s *Storage) SaveData(ctx context.Context, request SaveDataRequestModel) er
 		return err
 	}
 
-	query := `INSERT INTO data_store (id, user_id, description, data_type) VALUES (?, ?, ?, ?)`
-	_, err = s.db.ExecContext(ctx, query, request.Filename, request.Userid, request.Description, request.Datatype)
+	query := `INSERT INTO data_store (id, user_id, description, data_type, hash, modification_timestamp) VALUES (?, ?, ?, ?, ?, ?)`
+	_, err = s.db.ExecContext(ctx, query,
+		request.Filename,
+		request.Userid,
+		request.Description,
+		request.Datatype,
+		request.Hash,
+		request.ModificationTimestamp)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *Storage) GetDataList(ctx context.Context, userID string) ([]GetDataListResponseItemModel, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT id, user_id, description, data_type FROM data_store WHERE user_id = ?`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []GetDataListResponseItemModel{}
+	for rows.Next() {
+		var item GetDataListResponseItemModel
+		err = rows.Scan(&item.ID, &item.UserID, &item.Description, &item.Datatype)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	if err = rows.Err(); err != nil {
+		return items, err
+	}
+	return items, nil
+}
+
+func (s *Storage) GetDataListToSynchronize(ctx context.Context, userID string) ([]GetDataListToSynchronizeItemModel, error) {
+	query := `
+	SELECT id, user_id, description, data_type, hash, modification_timestamp, is_deleted
+	FROM data_store 
+	WHERE user_id = ?`
+	rows, err := s.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []GetDataListToSynchronizeItemModel{}
+	for rows.Next() {
+		var item GetDataListToSynchronizeItemModel
+		err = rows.Scan(&item.ID, &item.UserID, &item.Description, &item.Datatype, &item.Hash, &item.ModificationTimestamp, &item.IsDeleted)
+		if err != nil {
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	if err = rows.Err(); err != nil {
+		return items, err
+	}
+	return items, nil
 }
 
 func (s *Storage) getTokensPath() string {
