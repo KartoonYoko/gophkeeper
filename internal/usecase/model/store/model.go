@@ -33,6 +33,13 @@ type UpdateDataRequestModel struct {
 	Data                  []byte
 }
 
+type RemoveDataByIDRequestModel struct {
+	ID                    string
+	UserID                string
+}
+
+type RemoveDataByIDResponseModel struct{}
+
 type UpdateDataResponseModel struct{}
 
 // Тип хранимых данных. Возможные значения:

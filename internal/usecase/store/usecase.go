@@ -148,6 +148,21 @@ func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequ
 	return response, nil
 }
 
-func (uc *Usecase) RemoveDataByID(ctx context.Context, dataID string) error {
-	return fmt.Errorf("unimplemented")
+func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveDataByIDRequestModel) (*model.RemoveDataByIDResponseModel, error) {
+	err := uc.storage.RemoveDataByID(ctx, &smodel.RemoveDataByIDRequestModel{
+		ID:     request.ID,
+		UserID: request.UserID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to remove data from database: %w", err)
+	}
+	err = uc.fstorage.RemoveDataByID(ctx, &sfmodel.RemoveDataByIDRequestModel{
+		ID:     request.ID,
+		UserID: request.UserID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to remove data from storage: %w", err)
+	}
+
+	return new(model.RemoveDataByIDResponseModel), nil
 }
