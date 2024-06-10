@@ -26,11 +26,13 @@ func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.S
 	}
 
 	ucrequest := &ucmodel.SaveDataRequestModel{
-		UserID:      userID,
-		Data:        r.Data,
-		DataType:    dt,
-		Description: r.Description,
-		ID:          r.Id,
+		UserID:                userID,
+		Data:                  r.Data,
+		DataType:              dt,
+		Description:           r.Description,
+		ID:                    r.Id,
+		Hash:                  r.Hash,
+		ModificationTimestamp: r.ModificationTimestamp,
 	}
 	saveDataResponse, err := c.usecaseStore.SaveData(ctx, ucrequest)
 	if err != nil {

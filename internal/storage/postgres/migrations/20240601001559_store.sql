@@ -8,6 +8,7 @@ CREATE TABLE "store"."data" (
   "binary_id" varchar,
   "description" varchar,
   "is_deleted" boolean,
+  "hash" varchar,
   "modification_timestamp" bigint,
   "data_type" varchar
 );

@@ -47,9 +47,9 @@ func Run() {
 	}
 	// usecases
 	ucAConf := usecaseAuth.Config{
-		RefreshTokenDurationMinute: 60,
+		RefreshTokenDurationMinute: 360,
 		SecretJWTKey:               "somesecretjwtkey",
-		JWTDurationMinute:          5,
+		JWTDurationMinute:          60,
 	}
 	ucAuth, err := usecaseAuth.New(psSt, ucAConf)
 	if err != nil {

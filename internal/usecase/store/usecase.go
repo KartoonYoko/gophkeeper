@@ -131,9 +131,21 @@ func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequ
 		return nil, fmt.Errorf("failed to save file: %w", err)
 	}
 
-	// TODO сохранить в БД
+	// сохранить в БД
+	rs := &smodel.UpdateDataRequestModel{
+		ID:                    request.ID,
+		UserID:                request.UserID,
+		ModificationTimestamp: request.ModificationTimestamp,
+		Hash:                  request.Hash,
+	}
+	_, err = uc.storage.UpdateData(ctx, rs)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update data: %w", err)
+	}
 
-	return nil, nil
+	response := new(model.UpdateDataResponseModel)
+
+	return response, nil
 }
 
 func (uc *Usecase) RemoveDataByID(ctx context.Context, dataID string) error {

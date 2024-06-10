@@ -9,8 +9,8 @@ import (
 
 func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.SaveDataResponseModel, error) {
 	query := `
-	INSERT INTO "store"."data" (user_id, binary_id, description, data_type, id)
-	VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO "store"."data" (user_id, binary_id, description, data_type, id, hash, modification_timestamp)
+	VALUES ($1, $2, $3, $4, $5, $6, $7)
 	RETURNING "id";
 	`
 
@@ -20,13 +20,31 @@ func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestMo
 		request.BinaryID, 
 		request.Description, 
 		request.DataType,
-		request.ID).Scan(&id)
+		request.ID,
+		request.Hash,
+		request.ModificationTimestamp).Scan(&id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save data: %w", err)
 	}
 
 	response := new(model.SaveDataResponseModel)
 	response.ID = id
+
+	return response, nil
+}
+
+func (s *Storage) UpdateData(ctx context.Context, request *model.UpdateDataRequestModel) (*model.UpdateDataResponseModel, error) {
+	query := `
+	UPDATE "store"."data" 
+	SET "hash" = $1, "modification_timestamp" = $2 
+	WHERE "id" = $3 AND "user_id" = $4`
+
+	_, err := s.pool.Exec(ctx, query, request.Hash, request.ModificationTimestamp, request.ID, request.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update data: %w", err)
+	}
+
+	response := new(model.UpdateDataResponseModel)
 
 	return response, nil
 }

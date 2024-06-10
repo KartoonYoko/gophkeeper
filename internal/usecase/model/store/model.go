@@ -1,11 +1,13 @@
 package store
 
 type SaveDataRequestModel struct {
-	ID          string
-	UserID      string
-	Data        []byte
-	DataType    DataType
-	Description string
+	ID                    string
+	UserID                string
+	Data                  []byte
+	DataType              DataType
+	Description           string
+	ModificationTimestamp int64
+	Hash                  string
 }
 
 type SaveDataResponseModel struct {

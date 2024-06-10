@@ -9,6 +9,7 @@ import (
 
 type Storager interface {
 	SaveData(ctx context.Context, request *storemodel.SaveDataRequestModel) (*storemodel.SaveDataResponseModel, error)
+	UpdateData(ctx context.Context, request *storemodel.UpdateDataRequestModel) (*storemodel.UpdateDataResponseModel, error)
 	GetDataByID(ctx context.Context, request *storemodel.GetDataByIDRequestModel) (*storemodel.GetDataByIDResponseModel, error)
 	RemoveDataByID(ctx context.Context, request *storemodel.RemoveDataByIDRequestModel) error
 }
