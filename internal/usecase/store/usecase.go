@@ -166,3 +166,9 @@ func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveData
 
 	return new(model.RemoveDataByIDResponseModel), nil
 }
+
+func (uc *Usecase) GetUserDataList(ctx context.Context, userID string) (*smodel.GetUserDataListResponseModel, error) {
+	return uc.storage.GetUserDataList(ctx, &smodel.GetUserDataListRequestModel{
+		UserID: userID,
+	})
+}

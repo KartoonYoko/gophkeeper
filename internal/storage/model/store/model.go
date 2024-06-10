@@ -43,3 +43,20 @@ type RemoveDataByIDRequestModel struct {
 	UserID string
 	ID     string
 }
+
+type GetUserDataListRequestModel struct {
+	UserID string
+}
+
+type GetUserDataListResponseModel struct {
+	Items []*GetUserDataListResponseItemModel
+}
+
+type GetUserDataListResponseItemModel struct {
+	ID                    string
+	Description           string
+	DataType              string
+	Hash                  string
+	ModificationTimestamp int64
+	IsDeleted             bool
+}

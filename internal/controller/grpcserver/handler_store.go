@@ -101,7 +101,21 @@ func (c *Controller) UpdateData(ctx context.Context, r *pb.UpdateDataRequest) (*
 }
 
 func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*pb.RemoveDataResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "")
+	userID, err := c.getUserIDFromContext(ctx)
+	if err != nil {
+		logger.Log.Error("can not get user ID from context", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+	_, err = c.usecaseStore.RemoveDataByID(ctx, &ucmodel.RemoveDataByIDRequestModel{
+		ID:     r.Id,
+		UserID: userID,
+	})
+
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	return &pb.RemoveDataResponse{}, nil
 }
 
 func (c *Controller) GetMetaDataList(ctx context.Context, r *pb.GetMetaDataListRequest) (*pb.GetMetaDataListResponse, error) {

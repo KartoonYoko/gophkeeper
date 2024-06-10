@@ -85,3 +85,38 @@ func (s *Storage) RemoveDataByID(ctx context.Context, request *model.RemoveDataB
 
 	return nil
 }
+
+func (s *Storage) GetUserDataList(ctx context.Context, request *model.GetUserDataListRequestModel) (*model.GetUserDataListResponseModel, error) {
+	query := `
+	SELECT id, description, data_type, hash, modification_timestamp, is_deleted 
+	FROM "store"."data" 
+	WHERE "user_id" = $1
+	`
+
+	rows, err := s.pool.Query(ctx, query, request.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query to get user data list: %w", err)
+	}
+	defer rows.Close()
+
+	response := new(model.GetUserDataListResponseModel)
+	for rows.Next() {
+		item := new(model.GetUserDataListResponseItemModel)
+
+		rows.Scan(
+			&item.ID, 
+			&item.Description, 
+			&item.DataType, 
+			&item.Hash, 
+			&item.ModificationTimestamp, 
+			&item.IsDeleted)
+
+			response.Items = append(response.Items, item)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("failed to get user data list: %w", err)
+	}
+
+	return response, nil
+}
