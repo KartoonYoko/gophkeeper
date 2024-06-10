@@ -112,6 +112,7 @@ func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*
 	})
 
 	if err != nil {
+		logger.Log.Error("remove data error", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 
@@ -119,7 +120,37 @@ func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*
 }
 
 func (c *Controller) GetMetaDataList(ctx context.Context, r *pb.GetMetaDataListRequest) (*pb.GetMetaDataListResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "")
+	userID, err := c.getUserIDFromContext(ctx)
+	if err != nil {
+		logger.Log.Error("can not get user ID from context", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	rs, err := c.usecaseStore.GetUserDataList(ctx, userID)
+	if err != nil {
+		logger.Log.Error("unable get user data list", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	response := new(pb.GetMetaDataListResponse)
+	for _, item := range rs.Items {
+		dt, err := getProtoDataTypeFromUsecaseDataType(item.DataType)
+		if err != nil {
+			logger.Log.Error("wrong data type", zap.Error(err))
+			return nil, status.Errorf(codes.Internal, "internal error")
+		}
+
+		response.Items = append(response.Items, &pb.GetMetaDataListItemResponse{
+			Id:                    item.ID,
+			Type:                  dt,
+			Hash:                  item.Hash,
+			Description:           item.Description,
+			ModificationTimestamp: item.ModificationTimestamp,
+			IsDeleted:             item.IsDeleted,
+		})
+	}
+
+	return response, nil
 }
 
 func getUsecaseDataTypeFromProtoDataType(dataType pb.DataTypeEnum) (ucmodel.DataType, error) {
