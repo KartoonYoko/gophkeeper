@@ -11,6 +11,17 @@ type SaveDataRequestModel struct {
 	UserID string
 }
 
+type UpdateDataRequestModel struct {
+	ID     string
+	Data   []byte
+	UserID string
+}
+
+type UpdateDataResponseModel struct {
+	ID     string
+	UserID string
+}
+
 type GetDataByIDRequestModel struct {
 	UserID string
 	ID     string

@@ -74,6 +74,44 @@ func (s *Storage) SaveData(ctx context.Context, request *filestoremodel.SaveData
 	return response, nil
 }
 
+func (s *Storage) UpdateData(ctx context.Context, request *filestoremodel.UpdateDataRequestModel) (*filestoremodel.UpdateDataResponseModel, error) {
+	contentType := "application/octet-stream"
+
+	bucketName := request.UserID
+	isExists, err := s.client.BucketExists(ctx, bucketName)
+	if err != nil {
+		return nil, err
+	}
+	if !isExists {
+		err = s.client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	objName := request.ID
+	if objName == "" {
+		objName = uuid.New().String()
+	}
+	
+	reader := bytes.NewReader(request.Data)
+	_, err = s.client.PutObject(
+		ctx,
+		bucketName,
+		objName,
+		reader,
+		int64(len(request.Data)),
+		minio.PutObjectOptions{ContentType: contentType})
+	if err != nil {
+		return nil, err
+	}
+
+	response := new(filestoremodel.UpdateDataResponseModel)
+	response.ID = objName
+
+	return response, nil
+}
+
 func (s *Storage) GetDataByID(ctx context.Context, request *filestoremodel.GetDataByIDRequestModel) (*filestoremodel.GetDataByIDResponseModel, error) {
 	obj, err := s.client.GetObject(ctx, request.UserID, request.ID, minio.GetObjectOptions{})
 	if err != nil {

@@ -15,6 +15,7 @@ type Storager interface {
 
 type FileStorager interface {
 	SaveData(ctx context.Context, request *filestoremodel.SaveDataRequestModel) (*filestoremodel.SaveDataResponseModel, error)
+	UpdateData(ctx context.Context, request *filestoremodel.UpdateDataRequestModel) (*filestoremodel.UpdateDataResponseModel, error)
 	GetDataByID(ctx context.Context, request *filestoremodel.GetDataByIDRequestModel) (*filestoremodel.GetDataByIDResponseModel, error)
 	RemoveDataByID(ctx context.Context, request *filestoremodel.RemoveDataByIDRequestModel) error
 }

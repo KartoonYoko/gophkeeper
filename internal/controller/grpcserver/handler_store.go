@@ -30,6 +30,7 @@ func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.S
 		Data:        r.Data,
 		DataType:    dt,
 		Description: r.Description,
+		ID:          r.Id,
 	}
 	saveDataResponse, err := c.usecaseStore.SaveData(ctx, ucrequest)
 	if err != nil {
@@ -49,10 +50,10 @@ func (c *Controller) GetDataByID(ctx context.Context, r *pb.GetDataByIDRequest) 
 		logger.Log.Error("can not get user ID from context", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
-	
+
 	request := &ucmodel.GetDataByIDRequestModel{
 		UserID: userID,
-		ID: r.Id,
+		ID:     r.Id,
 	}
 	getDataResponse, err := c.usecaseStore.GetDataByID(ctx, request)
 	if err != nil {
@@ -72,7 +73,38 @@ func (c *Controller) GetDataByID(ctx context.Context, r *pb.GetDataByIDRequest) 
 	response.Type = dt
 
 	return response, nil
-}	
+}
+
+func (c *Controller) UpdateData(ctx context.Context, r *pb.UpdateDataRequest) (*pb.UpdateDataResponse, error) {
+	userID, err := c.getUserIDFromContext(ctx)
+	if err != nil {
+		logger.Log.Error("can not get user ID from context", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	_, err = c.usecaseStore.UpdateData(ctx, &ucmodel.UpdateDataRequestModel{
+		ID:                    r.Id,
+		Data:                  r.Data,
+		UserID:                userID,
+		Hash:                  r.Hash,
+		ModificationTimestamp: r.ModificationTimestamp,
+	})
+
+	if err != nil {
+		logger.Log.Error("unable update data", zap.Error(err))
+		return nil, status.Errorf(codes.Internal, "internal error")
+	}
+
+	return &pb.UpdateDataResponse{}, nil
+}
+
+func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*pb.RemoveDataResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "")
+}
+
+func (c *Controller) GetMetaDataList(ctx context.Context, r *pb.GetMetaDataListRequest) (*pb.GetMetaDataListResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "")
+}
 
 func getUsecaseDataTypeFromProtoDataType(dataType pb.DataTypeEnum) (ucmodel.DataType, error) {
 	switch dataType {

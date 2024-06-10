@@ -55,6 +55,7 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 	}
 
 	rsd := &smodel.SaveDataRequestModel{
+		ID:          sfr.ID,
 		BinaryID:    sfr.ID,
 		UserID:      request.UserID,
 		Description: request.Description,
@@ -115,4 +116,26 @@ func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRe
 	}
 
 	return response, nil
+}
+
+func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequestModel) (*model.UpdateDataResponseModel, error) {
+	encryptedData := uc.dataCipherHandler.Encrypt(request.Data)
+
+	r := &sfmodel.SaveDataRequestModel{
+		ID:     request.ID,
+		Data:   encryptedData,
+		UserID: request.UserID,
+	}
+	_, err := uc.fstorage.SaveData(ctx, r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to save file: %w", err)
+	}
+
+	// TODO сохранить в БД
+
+	return nil, nil
+}
+
+func (uc *Usecase) RemoveDataByID(ctx context.Context, dataID string) error {
+	return fmt.Errorf("unimplemented")
 }

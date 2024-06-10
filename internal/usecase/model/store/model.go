@@ -23,6 +23,16 @@ type GetDataByIDResponseModel struct {
 	Description string
 }
 
+type UpdateDataRequestModel struct {
+	ID                    string
+	UserID                string
+	Hash                  string
+	ModificationTimestamp int64
+	Data                  []byte
+}
+
+type UpdateDataResponseModel struct{}
+
 // Тип хранимых данных. Возможные значения:
 //   - BANK_CARD
 //   - BINARY
