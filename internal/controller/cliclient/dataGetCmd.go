@@ -10,8 +10,8 @@ func init() {
 
 var dataGetCmd = &cobra.Command{
 	Use:   "get",
-	Short: "",
-	Long:  ``,
+	Short: "Allows to get personal data",
+	Long:  `Allows to get personal data`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()

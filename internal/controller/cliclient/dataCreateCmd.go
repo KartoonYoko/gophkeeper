@@ -15,8 +15,8 @@ type dataType string
 
 var dataCreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "",
-	Long:  ``,
+	Short: "Create private data",
+	Long:  `It allows you to create personal data. By default, it creates text data.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()

@@ -18,8 +18,8 @@ func init() {
 
 var registerCmd = &cobra.Command{
 	Use:   "register",
-	Short: "",
-	Long:  ``,
+	Short: "Creates a new user account",
+	Long:  `The registration command creates a new user account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()

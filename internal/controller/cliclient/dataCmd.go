@@ -8,8 +8,8 @@ func init() {
 
 var dataCmd = &cobra.Command{
 	Use:   "data",
-	Short: "",
-	Long:  ``,
+	Short: "Allows to manage personal data",
+	Long:  `Allows to manage personal data`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

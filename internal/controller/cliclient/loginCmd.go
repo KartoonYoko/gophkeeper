@@ -13,8 +13,9 @@ func init() {
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "",
-	Long:  ``,
+	Short: "Login to gophkeeper",
+	Long:  `The Login command allows you to authenticate. 
+	Only authenticated users can store personal information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()

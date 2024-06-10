@@ -8,8 +8,9 @@ func init() {
 
 var logoutCmd = &cobra.Command{
 	Use:   "logout",
-	Short: "",
-	Long:  ``,
+	Short: "The Logout command allows you to exit the system",
+	Long:  `The Logout command allows you to exit the system. Only one client can use the system at a time. 
+To use a different account, either set up another client or log out of the current one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()
