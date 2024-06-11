@@ -44,6 +44,6 @@ To use a different account, either set up another client or log out of the curre
 			return
 		}
 
-		cmd.Println("login successfully")
+		cmd.Println("logout successfully")
 	},
 }

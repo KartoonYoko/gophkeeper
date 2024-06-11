@@ -55,11 +55,13 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 	}
 
 	rsd := &smodel.SaveDataRequestModel{
-		ID:          sfr.ID,
-		BinaryID:    sfr.ID,
-		UserID:      request.UserID,
-		Description: request.Description,
-		DataType:    request.DataType.String(),
+		ID:                    sfr.ID,
+		BinaryID:              sfr.ID,
+		UserID:                request.UserID,
+		Description:           request.Description,
+		DataType:              request.DataType.String(),
+		Hash:                  request.Hash,
+		ModificationTimestamp: request.ModificationTimestamp,
 	}
 	resSaveData, err := uc.storage.SaveData(ctx, rsd)
 	if err != nil {

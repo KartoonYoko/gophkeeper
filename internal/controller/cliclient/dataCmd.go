@@ -17,7 +17,6 @@ var dataCmd = &cobra.Command{
 	Short: "Allows to manage personal data",
 	Long:  `Allows to manage personal data`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		// TODO проверить авторизирован ли пользователь
 		loggedin, err := controller.ucauth.IsUserLoggedIn(cmd.Context())
 		if err != nil {
 			return err

@@ -115,7 +115,7 @@ func (s *Storage) GetUserDataList(ctx context.Context, request *model.GetUserDat
 	}
 
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("failed to get user data list: %w", err)
+		return nil, fmt.Errorf("failed to get user data list: %w", rows.Err())
 	}
 
 	return response, nil

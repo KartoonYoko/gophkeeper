@@ -7,7 +7,7 @@ CREATE TABLE "store"."data" (
   "user_id" varchar,
   "binary_id" varchar,
   "description" varchar,
-  "is_deleted" boolean,
+  "is_deleted" boolean default FALSE,
   "hash" varchar,
   "modification_timestamp" bigint,
   "data_type" varchar
