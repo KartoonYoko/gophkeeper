@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
 	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"github.com/spf13/cobra"
 )
@@ -36,30 +37,109 @@ var dataCreateCmd = &cobra.Command{
 			return
 		}
 
+		pcd := promptContent{
+			errorMsg: "Please, enter description",
+			label:    "Enter description",
+		}
+		description, err := promptTextInput(pcd)
+		if err != nil {
+			cmd.PrintErrln(err)
+			return
+		}
+
+		msg := ""
 		if dt == "TEXT" {
 			pc := promptContent{
 				errorMsg: "Please, enter text",
 				label:    "Enter text",
 			}
-			text, err := promptTextInput(pc)
+			var text string
+			text, err = promptTextInput(pc)
 			if err != nil {
 				cmd.PrintErrln(err)
 				return
 			}
-			err = controller.ucstore.CreateTextData(ctx, text)
+			err = controller.ucstore.CreateTextData(ctx, text, description)
+			msg = "Text data created"
+		} else if dt == "BINARY" {
+			pc := promptContent{
+				errorMsg: "Please, enter file name",
+				label:    "Enter file name",
+			}
+			var filename string
+			filename, err = promptTextInput(pc)
 			if err != nil {
-				var serror *uccommon.ServerError
-				if errors.As(err, &serror) {
-					cmd.Printf("Successfull created locally, but got server error: %s. ", serror.Err)
-					return
-				}
 				cmd.PrintErrln(err)
 				return
+			}
+			err = controller.ucstore.CreateBinaryData(ctx, filename, description)
+			msg = "Binary data created"
+		} else if dt == "CREDENTIALS" {
+			pc := promptContent{
+				errorMsg: "Please, enter login",
+				label:    "Enter login",
+			}
+			var login, password string
+			login, err = promptTextInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			pc = promptContent{
+				errorMsg: "Please, enter password",
+				label:    "Enter password",
 			}
 
-			cmd.Println("Text data created")
+			password, err = promptPasswordInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			err = controller.ucstore.CreateCredentialsData(ctx,clientstore.CredentialDataModel{
+				Login:    login,
+				Password: password,
+			}, description)
+			msg = "Credentials created"
+		} else if dt == "BANK_CARD" {
+			var cardnumber, cvv string
+			var pc promptContent
+			pc = promptContent{
+				errorMsg: "Please, enter card number",
+				label:    "Enter card number",
+			}
+			
+			cardnumber, err = promptTextInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			pc = promptContent{
+				errorMsg: "Please, enter cvv",
+				label:    "Enter cvv",
+			}
+
+			cvv, err = promptPasswordInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			err = controller.ucstore.CreateBankCardData(ctx,clientstore.BankCardDataModel{
+				Number: cardnumber,
+				CVV: cvv,
+			}, description)
+			msg = "Credentials created"
+		}
+		
+		if err != nil {
+			var serror *uccommon.ServerError
+			if errors.As(err, &serror) {
+				cmd.Printf("Successfull created locally, but got server error: %s. ", serror.Err)
+				return
+			}
+			cmd.PrintErrln(err)
+			return
 		} else {
-			cmd.PrintErrln("Not implemented yet")
+			cmd.Println(msg)	
 		}
 	},
 }

@@ -1,11 +1,8 @@
 package clientstore
 
-import "time"
-
 type BankCardDataModel struct {
-	Number     string    `json:"number"`
-	CVV        string    `json:"cvv"`
-	ValidUntil time.Time `json:"valid_until"`
+	Number string `json:"number"`
+	CVV    string `json:"cvv"`
 }
 
 type CredentialDataModel struct {

@@ -36,11 +36,11 @@ func New(conn *grpc.ClientConn, store *clientstorage.Storage) *Usecase {
 // CreateTextData сохраняет текстовые данные
 //
 // TODO: обернуть обращение к серверу, чтобы выводить в этом случае не ошибку, а предупреждение, что сервер не досутпен, но данные сохранены локально
-func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
-	return uc.saveBytes(ctx, []byte(text), "TEXT")
+func (uc *Usecase) CreateTextData(ctx context.Context, text string, description string) error {
+	return uc.saveBytes(ctx, []byte(text), description, "TEXT")
 }
 
-func (uc *Usecase) CreateBinaryData(ctx context.Context, filepath string) error {
+func (uc *Usecase) CreateBinaryData(ctx context.Context, filepath string, description string) error {
 	f, err := os.OpenFile(filepath, os.O_RDONLY, 0)
 	if err != nil {
 		return err
@@ -52,25 +52,25 @@ func (uc *Usecase) CreateBinaryData(ctx context.Context, filepath string) error 
 		return err
 	}
 
-	return uc.saveBytes(ctx, b, "BINARY")
+	return uc.saveBytes(ctx, b, description, "BINARY")
 }
 
-func (uc *Usecase) CreateBankCardData(ctx context.Context, card BankCardDataModel) error {
+func (uc *Usecase) CreateBankCardData(ctx context.Context, card BankCardDataModel, description string) error {
 	b, err := json.Marshal(card)
 	if err != nil {
 		return err
 	}
 
-	return uc.saveBytes(ctx, b, "BANK_CARD")
+	return uc.saveBytes(ctx, b, description, "BANK_CARD")
 }
 
-func (uc *Usecase) CreateCredentialsData(ctx context.Context, credential *CredentialDataModel) error {
+func (uc *Usecase) CreateCredentialsData(ctx context.Context, credential CredentialDataModel, description string) error {
 	b, err := json.Marshal(credential)
 	if err != nil {
 		return err
 	}
 
-	return uc.saveBytes(ctx, b, "CREDENTIALS")
+	return uc.saveBytes(ctx, b, description, "CREDENTIALS")
 }
 
 func (uc *Usecase) GetDataList(ctx context.Context) ([]clientstorage.GetDataListResponseItemModel, error) {
@@ -378,7 +378,7 @@ func (uc *Usecase) getDataHash(data []byte) string {
 	return base64.StdEncoding.EncodeToString(hash)
 }
 
-func (uc *Usecase) saveBytes(ctx context.Context, b []byte, datatype string) error {
+func (uc *Usecase) saveBytes(ctx context.Context, b []byte, description string, datatype string) error {
 	// - шифрую данные и работаю далее только с шифрованными данными
 	// - сохраняю локльно на диске (генерировать название файла, используя guid)
 	// - сохраняю информацию в БД
@@ -403,7 +403,7 @@ func (uc *Usecase) saveBytes(ctx context.Context, b []byte, datatype string) err
 	r := clientstorage.SaveDataRequestModel{
 		ID:                    id,
 		Userid:                userID,
-		Description:           "",
+		Description:           description,
 		Datatype:              datatype,
 		Hash:                  hash,
 		ModificationTimestamp: modts,
