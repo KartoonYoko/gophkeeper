@@ -3,6 +3,9 @@ package clientstore
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"io"
+	"os"
 	"strings"
 	"time"
 
@@ -34,70 +37,40 @@ func New(conn *grpc.ClientConn, store *clientstorage.Storage) *Usecase {
 //
 // TODO: обернуть обращение к серверу, чтобы выводить в этом случае не ошибку, а предупреждение, что сервер не досутпен, но данные сохранены локально
 func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
-	// - шифрую данные и работаю далее только с шифрованными данными
-	// - сохраняю локльно на диске (генерировать название файла, используя guid)
-	// - сохраняю информацию в БД
-	// - пробую сохранить удалённо
-
-	// формируем данные для сохранения
-	cipher, err := uc.getDataCipher()
-	if err != nil {
-		return err
-	}
-	id := uuid.New().String()
-	encrypted := cipher.Encrypt([]byte(text))
-	hash := uc.getDataHash([]byte(text))
-	modts := uc.getModificationTimestamp()
-	userID, err := uc.storage.GetUserID()
-	if err != nil {
-		return err
-	}
-
-	// пробуем сохранить локально
-	r := clientstorage.SaveDataRequestModel{
-		ID:                    id,
-		Userid:                userID,
-		Description:           "",
-		Datatype:              "TEXT",
-		Hash:                  hash,
-		ModificationTimestamp: modts,
-		Data:                  encrypted,
-	}
-	err = uc.storage.SaveData(ctx, r)
-	if err != nil {
-		return err
-	}
-
-	// сохраняем удалённо
-	rr := &pb.SaveDataRequest{
-		Id:                    r.ID,
-		Description:           r.Description,
-		Type:                  getPBDataTypeFromString(r.Datatype),
-		Data:                  r.Data,
-		Hash:                  r.Hash,
-		ModificationTimestamp: modts,
-	}
-	_, err = uc.client.SaveData(ctx, rr)
-	if err != nil {
-		return uccommon.NewServerError(err)
-	}
-
-	return nil
+	return uc.saveBytes(ctx, []byte(text), "TEXT")
 }
 
 func (uc *Usecase) CreateBinaryData(ctx context.Context, filepath string) error {
-	// TODO
-	return nil
+	f, err := os.OpenFile(filepath, os.O_RDONLY, 0)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+
+	return uc.saveBytes(ctx, b, "BINARY")
 }
 
 func (uc *Usecase) CreateBankCardData(ctx context.Context, card BankCardDataModel) error {
-	// TODO
-	return nil
+	b, err := json.Marshal(card)
+	if err != nil {
+		return err
+	}
+
+	return uc.saveBytes(ctx, b, "BANK_CARD")
 }
 
 func (uc *Usecase) CreateCredentialsData(ctx context.Context, credential *CredentialDataModel) error {
-	// TODO
-	return nil
+	b, err := json.Marshal(credential)
+	if err != nil {
+		return err
+	}
+
+	return uc.saveBytes(ctx, b, "CREDENTIALS")
 }
 
 func (uc *Usecase) GetDataList(ctx context.Context) ([]clientstorage.GetDataListResponseItemModel, error) {
@@ -403,6 +376,59 @@ func (uc *Usecase) getModificationTimestamp() int64 {
 func (uc *Usecase) getDataHash(data []byte) string {
 	hash := common.NewDataHasherSHA256().Hash(data)
 	return base64.StdEncoding.EncodeToString(hash)
+}
+
+func (uc *Usecase) saveBytes(ctx context.Context, b []byte, datatype string) error {
+	// - шифрую данные и работаю далее только с шифрованными данными
+	// - сохраняю локльно на диске (генерировать название файла, используя guid)
+	// - сохраняю информацию в БД
+	// - пробую сохранить удалённо
+
+	// формируем данные для сохранения
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return err
+	}
+
+	id := uuid.New().String()
+	encrypted := cipher.Encrypt(b)
+	hash := uc.getDataHash(b)
+	modts := uc.getModificationTimestamp()
+	userID, err := uc.storage.GetUserID()
+	if err != nil {
+		return err
+	}
+
+	// пробуем сохранить локально
+	r := clientstorage.SaveDataRequestModel{
+		ID:                    id,
+		Userid:                userID,
+		Description:           "",
+		Datatype:              datatype,
+		Hash:                  hash,
+		ModificationTimestamp: modts,
+		Data:                  encrypted,
+	}
+	err = uc.storage.SaveData(ctx, r)
+	if err != nil {
+		return err
+	}
+
+	// сохраняем удалённо
+	rr := &pb.SaveDataRequest{
+		Id:                    r.ID,
+		Description:           r.Description,
+		Type:                  getPBDataTypeFromString(r.Datatype),
+		Data:                  r.Data,
+		Hash:                  r.Hash,
+		ModificationTimestamp: modts,
+	}
+	_, err = uc.client.SaveData(ctx, rr)
+	if err != nil {
+		return uccommon.NewServerError(err)
+	}
+
+	return nil
 }
 
 func getPBDataTypeFromString(str string) pb.DataTypeEnum {

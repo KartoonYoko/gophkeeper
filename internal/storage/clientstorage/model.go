@@ -4,6 +4,11 @@ type SaveDataRequestModel struct {
 	ID                    string
 	Userid                string
 	Description           string
+	// Возможные значения:
+	// 	- TEXT
+	// 	- BINARY
+	// 	- CREDENTIALS
+	// 	- BANK_CARD
 	Datatype              string
 	Hash                  string
 	ModificationTimestamp int64
