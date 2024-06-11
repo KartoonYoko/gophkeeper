@@ -104,6 +104,9 @@ func (uc *Usecase) Logout(ctx context.Context) error {
 func (uc *Usecase) LogoutForce(ctx context.Context) error {
 	_, rt, err := uc.storage.GetTokens()
 	if err != nil {
+		if errors.Is(err, clientstorage.ErrTokensNotFound) {
+			return cliclient.NewTokenNotFoundError(err)
+		}
 		return err
 	}
 

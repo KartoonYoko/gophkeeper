@@ -118,5 +118,6 @@ func (c *Controller) Register(ctx context.Context, request *pb.RegisterRequest) 
 			RefreshToken: result.RefreshToken,
 		},
 		SecretKey: result.SecretKey,
+		UserId:    result.UserID,
 	}, nil
 }

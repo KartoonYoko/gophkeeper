@@ -20,6 +20,16 @@ var loginCmd = &cobra.Command{
 		var err error
 		ctx := cmd.Context()
 
+		loggedin, err := controller.ucauth.IsUserLoggedIn(ctx)
+		if err != nil {
+			cmd.PrintErrln(err)
+			return
+		}
+		if loggedin {
+			cmd.Println("You are already logged in. Please, logout first")
+			return
+		}
+
 		// ввод логина
 		flogin, err := cmd.Flags().GetString("login")
 		if err != nil {
