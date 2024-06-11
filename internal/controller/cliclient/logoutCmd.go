@@ -1,6 +1,11 @@
 package cliclient
 
-import "github.com/spf13/cobra"
+import (
+	"errors"
+
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
+	"github.com/spf13/cobra"
+)
 
 func init() {
 	logoutCmd.Flags().Bool("force", false, "force logout even if server not responding")
@@ -11,7 +16,7 @@ func init() {
 var logoutCmd = &cobra.Command{
 	Use:   "logout",
 	Short: "The Logout command allows you to exit the system",
-	Long:  `The Logout command allows you to exit the system. Only one client can use the system at a time. 
+	Long: `The Logout command allows you to exit the system. Only one client can use the system at a time. 
 To use a different account, either set up another client or log out of the current one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
@@ -28,8 +33,13 @@ To use a different account, either set up another client or log out of the curre
 		} else {
 			err = controller.ucauth.Logout(ctx)
 		}
-		
+
 		if err != nil {
+			var serror *uccommon.TokenNotFoundError
+			if errors.As(err, &serror) {
+				cmd.Printf("you are not logged in")
+				return
+			}
 			cmd.PrintErrln(err)
 			return
 		}

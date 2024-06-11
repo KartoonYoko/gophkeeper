@@ -78,6 +78,9 @@ func (uc *Usecase) IsUserLoggedIn(ctx context.Context) (bool, error) {
 func (uc *Usecase) Logout(ctx context.Context) error {
 	_, rt, err := uc.storage.GetTokens()
 	if err != nil {
+		if errors.Is(err, clientstorage.ErrTokensNotFound) {
+			return cliclient.NewTokenNotFoundError(err)
+		}
 		return err
 	}
 

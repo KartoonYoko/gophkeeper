@@ -14,24 +14,32 @@ func init() {
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login to gophkeeper",
-	Long:  `The Login command allows you to authenticate. 
+	Long: `The Login command allows you to authenticate. 
 	Only authenticated users can store personal information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()
 
-		err = cmd.MarkFlagRequired("login")
+		// ввод логина
+		flogin, err := cmd.Flags().GetString("login")
 		if err != nil {
 			cmd.PrintErrln(err)
 			return
 		}
-
-		flogin, err := validateRequiredStringFlag(cmd, "login")
-		if err != nil {
-			cmd.PrintErrln(err)
-			return
+		if flogin == "" {
+			pc := promptContent{
+				errorMsg: "Please, enter your login",
+				label:    "Enter your login",
+			}
+			flogin, err = promptTextInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
 		}
-		fpassword, err := validateRequiredStringFlag(cmd, "login")
+		
+		// ввод пароля
+		fpassword, err := cmd.Flags().GetString("login")
 		if err != nil {
 			cmd.PrintErrln(err)
 			return
