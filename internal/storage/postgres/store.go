@@ -75,10 +75,11 @@ func (s *Storage) GetDataByID(ctx context.Context, request *model.GetDataByIDReq
 
 func (s *Storage) RemoveDataByID(ctx context.Context, request *model.RemoveDataByIDRequestModel) error {
 	query := `
-	DELETE FROM "store"."data" WHERE "id" = $1 AND "user_id" = $2
-	`
+	UPDATE "store"."data" 
+	SET "is_deleted" = TRUE, "modification_timestamp" = $1 
+	WHERE "id" = $2 AND "user_id" = $3`
 
-	_, err := s.pool.Exec(ctx, query, request.ID, request.UserID)
+	_, err := s.pool.Exec(ctx, query, request.ModificationTimestamp, request.ID, request.UserID)
 	if err != nil {
 		return fmt.Errorf("failed to remove data: %w", err)
 	}

@@ -40,8 +40,9 @@ type GetDataByIDResponseModel struct {
 }
 
 type RemoveDataByIDRequestModel struct {
-	UserID string
-	ID     string
+	UserID                string
+	ID                    string
+	ModificationTimestamp int64
 }
 
 type GetUserDataListRequestModel struct {

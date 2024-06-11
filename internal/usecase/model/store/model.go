@@ -36,6 +36,7 @@ type UpdateDataRequestModel struct {
 type RemoveDataByIDRequestModel struct {
 	ID                    string
 	UserID                string
+	ModificationTimestamp int64
 }
 
 type RemoveDataByIDResponseModel struct{}

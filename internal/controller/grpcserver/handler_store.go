@@ -107,8 +107,9 @@ func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*
 		return nil, status.Errorf(codes.Internal, "internal error")
 	}
 	_, err = c.usecaseStore.RemoveDataByID(ctx, &ucmodel.RemoveDataByIDRequestModel{
-		ID:     r.Id,
-		UserID: userID,
+		ID:                    r.Id,
+		UserID:                userID,
+		ModificationTimestamp: r.ModificationTimestamp,
 	})
 
 	if err != nil {

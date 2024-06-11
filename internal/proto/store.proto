@@ -16,6 +16,7 @@ service StoreService {
 
 message RemoveDataRequest {
     string id = 1;
+    int64 modification_timestamp = 2;
 }
 
 message RemoveDataResponse {}

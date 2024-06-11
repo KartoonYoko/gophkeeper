@@ -154,6 +154,7 @@ func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveData
 	err := uc.storage.RemoveDataByID(ctx, &smodel.RemoveDataByIDRequestModel{
 		ID:     request.ID,
 		UserID: request.UserID,
+		ModificationTimestamp: request.ModificationTimestamp,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to remove data from database: %w", err)
