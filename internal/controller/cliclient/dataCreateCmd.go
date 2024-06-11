@@ -1,8 +1,10 @@
 package cliclient
 
 import (
+	"errors"
 	"strings"
 
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +35,6 @@ var dataCreateCmd = &cobra.Command{
 			return
 		}
 
-		// todo syncrhonize
 		if dt == "TEXT" {
 			pc := promptContent{
 				errorMsg: "Please, enter text",
@@ -46,6 +47,11 @@ var dataCreateCmd = &cobra.Command{
 			}
 			err = controller.ucstore.CreateTextData(ctx, text)
 			if err != nil {
+				var serror *clientstore.ServerError
+				if errors.As(err, &serror) {
+					cmd.Printf("Successfull created locally, but got server error: %s. ", serror.Err)
+					return
+				}
 				cmd.PrintErrln(err)
 				return
 			}

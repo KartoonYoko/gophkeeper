@@ -1,8 +1,10 @@
 package cliclient
 
 import (
+	"errors"
 	"strings"
 
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
 	"github.com/spf13/cobra"
 )
 
@@ -31,6 +33,12 @@ Complete documentation is available at https://github.com/KartoonYoko/gophkeeper
 		cmd.Println("Syncronizing...")
 		err := controller.ucstore.Synchronize(cmd.Context())
 		if err != nil {
+			var serror *clientstore.ServerError
+			if errors.As(err, &serror) {
+				cmd.Printf("got server error: %s\n", serror.Err)
+				return
+			}
+
 			cmd.Printf("Got error during syncronization: %s\n", err)
 		}
 	},
