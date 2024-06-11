@@ -363,14 +363,18 @@ func (uc *Usecase) UpdateTextData(ctx context.Context, dataid string, text strin
 }
 
 func (uc *Usecase) RemoveDataByID(ctx context.Context, dataid string) error {
+	modts := uc.getModificationTimestamp()
 	err := uc.storage.RemoveDataByID(ctx, clientstorage.RemoveDataByIDRequestModel{
 		DataID:                dataid,
-		ModificationTimestamp: uc.getModificationTimestamp(),
+		ModificationTimestamp: modts,
 	})
 	if err != nil {
 		return err
 	}
-	_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{Id: dataid})
+	_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{
+		Id:                    dataid,
+		ModificationTimestamp: modts,
+	})
 	if err != nil {
 		return uccommon.NewServerError(err)
 	}
