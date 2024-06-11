@@ -8,8 +8,8 @@ func init() {
 
 var dataGetListCmd = &cobra.Command{
 	Use:   "getlist",
-	Short: "Get list of all data",
-	Long:  `Get list of all data`,
+	Short: "Get list of common data (ID, Data type, Description)",
+	Long:  `Get list of common data (ID, Data type, Description)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		ctx := cmd.Context()
