@@ -10,6 +10,7 @@ import (
 
 func init() {
 	dataCreateCmd.Flags().String("datatype", "TEXT", "Set data type that you want create. Possible values: TEXT, CREDENTIALS, BANK_CARD, BINARY.")
+	
 	dataCmd.AddCommand(dataCreateCmd)
 }
 
