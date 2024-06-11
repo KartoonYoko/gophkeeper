@@ -23,8 +23,15 @@ var dataGetCmd = &cobra.Command{
 		}
 
 		if dataid == "" {
-			cmd.Help()
-			return
+			pc := promptContent{
+				errorMsg: "Please, enter ID of data",
+				label:    "Enter data ID",
+			}
+			dataid, err = promptTextInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
 		}
 
 		item, err := controller.ucstore.GetDataByID(ctx, dataid)
@@ -34,6 +41,6 @@ var dataGetCmd = &cobra.Command{
 		}
 
 		cmd.Printf("%-40s %-10s %-10s %-10s\n", "ID", "DATATYPE", "DATA", "DESCRIPTION")
-		cmd.Printf("%-40s %-10s %-10s %-10s\n", item.ID, item.Datatype, item.Data, item.Description)			
+		cmd.Printf("%-40s %-10s %-10s %-10s\n", item.ID, item.Datatype, item.Data, item.Description)
 	},
 }

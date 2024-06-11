@@ -9,7 +9,9 @@ type ServerError struct {
 
 // NewServerError конструктор
 func NewServerError(err error) *ServerError {
-	return &ServerError{}
+	return &ServerError{
+		Err: err,
+	}
 }
 
 // Error релизует интерфейс error

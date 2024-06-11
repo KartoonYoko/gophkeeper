@@ -35,7 +35,7 @@ Complete documentation is available at https://github.com/KartoonYoko/gophkeeper
 		if err != nil {
 			var serror *clientstore.ServerError
 			if errors.As(err, &serror) {
-				cmd.Printf("got server error: %s\n", serror.Err)
+				cmd.Printf("got server error: %v\n", serror.Err)
 				return
 			}
 

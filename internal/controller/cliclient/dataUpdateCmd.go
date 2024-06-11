@@ -21,10 +21,22 @@ var dataUpdateCmd = &cobra.Command{
 		var err error
 		ctx := cmd.Context()
 
-		dataid, err := validateRequiredStringFlag(cmd, "dataid")
+		dataid, err := cmd.Flags().GetString("dataid")
 		if err != nil {
 			cmd.PrintErrln(err)
 			return
+		}
+
+		if dataid == "" {
+			pc := promptContent{
+				errorMsg: "Please, enter ID of data",
+				label:    "Enter data ID",
+			}
+			dataid, err = promptTextInput(pc)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
 		}
 
 		pc := promptContent{
