@@ -41,7 +41,34 @@ var dataGetCmd = &cobra.Command{
 			return
 		}
 
-		cmd.Printf("%-40s %-10s %-10s %-10s\n", "ID", "DATATYPE", "DATA", "DESCRIPTION")
-		cmd.Printf("%-40s %-10s %-10s %-10s\n", item.ID, item.Datatype, item.Data, item.Description)
+		if item.Datatype == "TEXT" {
+			r, err := controller.ucstore.GetTextDataByID(ctx, dataid)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			cmd.Printf("Description: %s\nData: %s\n", r.Description, r.Text)
+		} else if item.Datatype == "BINARY" {
+			r, err := controller.ucstore.GetBinaryDataByID(ctx, dataid)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			cmd.Printf("Description: %s\nData: %s\n", r.Description, r.Text)
+		} else if item.Datatype == "CREDENTIALS" {
+			r, err := controller.ucstore.GetCredentialsDataByID(ctx, dataid)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			cmd.Printf("Description: %s\nLogin: %s\nPassword: %s\n", r.Description, r.Login, r.Password)
+		} else if item.Datatype == "BANK_CARD" {
+			r, err := controller.ucstore.GetBankCardDataByID(ctx, dataid)
+			if err != nil {
+				cmd.PrintErrln(err)
+				return
+			}
+			cmd.Printf("Description: %s\nNumber: %s\nCVV: %s\n", r.Description, r.Number, r.CVV)
+		}
 	},
 }
