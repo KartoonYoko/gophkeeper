@@ -60,7 +60,32 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) err
 	return nil
 }
 
+
+// Logout сначала рахлогинивается на сервере, затем локально
 func (uc *Usecase) Logout(ctx context.Context) error {
+	_, rt, err := uc.storage.GetTokens()
+	if err != nil {
+		return err
+	}
+
+	request := &pb.LogoutRequest{
+		RefreshToken: rt,
+	}
+	_, err = uc.client.Logout(ctx, request)
+	if err != nil {
+		return cliclient.NewServerError(err)
+	}
+
+	err = uc.storage.RemoveTokens()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// LogoutForce удаляет данные пользователя локльно даже если сервер не отвечает
+func (uc *Usecase) LogoutForce(ctx context.Context) error {
 	_, rt, err := uc.storage.GetTokens()
 	if err != nil {
 		return err
@@ -76,13 +101,12 @@ func (uc *Usecase) Logout(ctx context.Context) error {
 	}
 	_, err = uc.client.Logout(ctx, request)
 	if err != nil {
-		// TODO продумать дополнительную команду, которая разлогинивает локально:
-		// для тех случаев, когда сервер не отвечает
 		return cliclient.NewServerError(err)
 	}
 
 	return nil
 }
+
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) error {
 	request := &pb.RegisterRequest{

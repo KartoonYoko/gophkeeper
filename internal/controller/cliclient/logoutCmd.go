@@ -3,6 +3,8 @@ package cliclient
 import "github.com/spf13/cobra"
 
 func init() {
+	logoutCmd.Flags().Bool("force", false, "force logout even if server not responding")
+
 	root.AddCommand(logoutCmd)
 }
 
@@ -15,7 +17,18 @@ To use a different account, either set up another client or log out of the curre
 		var err error
 		ctx := cmd.Context()
 
-		err = controller.ucauth.Logout(ctx)
+		force, err := cmd.Flags().GetBool("force")
+		if err != nil {
+			cmd.PrintErrln(err)
+			return
+		}
+
+		if force {
+			err = controller.ucauth.LogoutForce(ctx)
+		} else {
+			err = controller.ucauth.Logout(ctx)
+		}
+		
 		if err != nil {
 			cmd.PrintErrln(err)
 			return
