@@ -35,11 +35,11 @@ Complete documentation is available at https://github.com/KartoonYoko/gophkeeper
 		if err != nil {
 			var serror *clientstore.ServerError
 			if errors.As(err, &serror) {
-				cmd.Printf("got server error: %v\n", serror.Err)
+				cmd.Printf("got server error: %v\n\n", serror.Err)
 				return
 			}
 
-			cmd.Printf("Got error during syncronization: %s\n", err)
+			cmd.Printf("Got error during syncronization: %s\n\n", err)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {

@@ -90,6 +90,35 @@ func (s *Storage) GetTokens() (at string, rt string, err error) {
 	return tf.AccessToken, tf.RefreshToken, nil
 }
 
+func (s *Storage) UpdateTokens(accesstoken string, refreshtoken string) (err error) {
+	// считаем текущие настройки
+	b, err := os.ReadFile(s.getTokensPath())
+	if err != nil {
+		return err
+	}
+	tf := &credentialsFile{}
+	err = json.Unmarshal(b, tf)
+	if err != nil {
+		return  err
+	}
+
+	// обновим токены
+	tf.AccessToken = accesstoken
+	tf.RefreshToken = refreshtoken
+
+	// запишем настройки
+	b, err = json.Marshal(tf)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(s.getTokensPath(), b, 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Storage) RemoveTokens() error {
 	return os.Remove(s.getTokensPath())
 }
