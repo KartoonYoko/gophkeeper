@@ -34,6 +34,7 @@ var dataGetCmd = &cobra.Command{
 			}
 		}
 
+		// TODO вместо этого метода вызывать метод, который возвращает только тип без самих данных
 		item, err := controller.ucstore.GetDataByID(ctx, dataid)
 		if err != nil {
 			cmd.PrintErrln(err)

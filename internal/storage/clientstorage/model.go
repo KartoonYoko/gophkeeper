@@ -1,9 +1,9 @@
 package clientstorage
 
 type SaveDataRequestModel struct {
-	ID                    string
-	Userid                string
-	Description           string
+	ID          string
+	Userid      string
+	Description string
 	// Возможные значения:
 	// 	- TEXT
 	// 	- BINARY
@@ -47,6 +47,28 @@ type GetDataByIDResponseModel struct {
 	Hash                  string
 	ModificationTimestamp int64
 	Data                  []byte
+}
+
+type GetTextDataByIDResponseModel struct {
+	Description string
+	Text        string
+}
+
+type GetBinaryDataByIDResponseModel struct {
+	Description string
+	Text        string
+}
+
+type GetBankCardDataByIDResponseModel struct {
+	Description string
+	Number      string
+	CVV         string
+}
+
+type GetCredentialsDataByIDResponseModel struct {
+	Description string
+	Login       string
+	Password    string
 }
 
 type RemoveDataByIDRequestModel struct {

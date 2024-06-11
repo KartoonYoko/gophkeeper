@@ -98,9 +98,109 @@ func (uc *Usecase) GetDataByID(ctx context.Context, id string) (*clientstorage.G
 		return nil, err
 	}
 
-	// TODO подумать как обходиться с разными типами данных;
-	// скорее всего жто должен делать контроллер, вызывая для разных типов данных разные методы
 	return res, nil
+}
+
+func (uc *Usecase) GetTextDataByID(ctx context.Context, id string) (*clientstorage.GetTextDataByIDResponseModel, error) {
+	res, err := uc.storage.GetDataByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return nil, err
+	}
+
+	res.Data, err = cipher.Decrypt(res.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	return &clientstorage.GetTextDataByIDResponseModel{
+		Description: res.Description,
+		Text:        string(res.Data),
+	}, nil
+}
+
+func (uc *Usecase) GetBinaryDataByID(ctx context.Context, id string) (*clientstorage.GetBinaryDataByIDResponseModel, error) {
+	res, err := uc.storage.GetDataByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return nil, err
+	}
+
+	res.Data, err = cipher.Decrypt(res.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	return &clientstorage.GetBinaryDataByIDResponseModel{
+		Description: res.Description,
+		Text:        string(res.Data),
+	}, nil
+}
+
+func (uc *Usecase) GetBankCardDataByID(ctx context.Context, id string) (*clientstorage.GetBankCardDataByIDResponseModel, error) {
+	res, err := uc.storage.GetDataByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return nil, err
+	}
+
+	res.Data, err = cipher.Decrypt(res.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	d := new(BankCardDataModel)
+	err = json.Unmarshal(res.Data, d)
+	if err != nil {
+		return nil, err
+	}
+
+	return &clientstorage.GetBankCardDataByIDResponseModel{
+		Description: res.Description,
+		Number:      d.Number,
+		CVV:         d.CVV,
+	}, nil
+}
+
+func (uc *Usecase) GetCredentialsDataByID(ctx context.Context, id string) (*clientstorage.GetCredentialsDataByIDResponseModel, error) {
+	res, err := uc.storage.GetDataByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return nil, err
+	}
+
+	res.Data, err = cipher.Decrypt(res.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	d := new(CredentialDataModel)
+	err = json.Unmarshal(res.Data, d)
+	if err != nil {
+		return nil, err
+	}
+
+	return &clientstorage.GetCredentialsDataByIDResponseModel{
+		Description: res.Description,
+		Login:       d.Login,
+		Password:    d.Password,
+	}, nil
 }
 
 // Synchronize синхронизирует данные с сервером
