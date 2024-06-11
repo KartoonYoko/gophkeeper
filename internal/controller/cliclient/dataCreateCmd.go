@@ -31,7 +31,7 @@ var dataCreateCmd = &cobra.Command{
 			return
 		}
 
-		dt := dataType(datatype)
+		dt := dataType(strings.ToUpper(datatype))
 		if !dt.isValid() {
 			cmd.PrintErrln("Invalid data type. Please, use TEXT, CREDENTIALS, BANK_CARD, BINARY.")
 			return
