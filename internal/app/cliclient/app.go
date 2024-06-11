@@ -35,6 +35,7 @@ func Run() {
 	if err != nil {
 		log.Fatalf("failed init store: %v", err)
 	}
+	defer tokenstore.Close()
 
 	sc, err := NewServerConnection(tokenstore)
 	if err != nil {

@@ -3,6 +3,7 @@ package clientstorage
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
@@ -78,6 +79,9 @@ func (s *Storage) SaveCredentials(ctx context.Context, at string, rt string, sk 
 func (s *Storage) GetTokens() (at string, rt string, err error) {
 	b, err := os.ReadFile(s.getTokensPath())
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return ``, ``, ErrTokensNotFound
+		}
 		return ``, ``, err
 	}
 
@@ -99,7 +103,7 @@ func (s *Storage) UpdateTokens(accesstoken string, refreshtoken string) (err err
 	tf := &credentialsFile{}
 	err = json.Unmarshal(b, tf)
 	if err != nil {
-		return  err
+		return err
 	}
 
 	// обновим токены

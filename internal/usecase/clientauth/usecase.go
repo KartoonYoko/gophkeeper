@@ -2,6 +2,7 @@ package clientauth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
@@ -60,6 +61,18 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) err
 	return nil
 }
 
+func (uc *Usecase) IsUserLoggedIn(ctx context.Context) (bool, error) {
+	_, _, err := uc.storage.GetTokens()
+	if errors.Is(err, clientstorage.ErrTokensNotFound) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
 
 // Logout сначала рахлогинивается на сервере, затем локально
 func (uc *Usecase) Logout(ctx context.Context) error {
@@ -106,7 +119,6 @@ func (uc *Usecase) LogoutForce(ctx context.Context) error {
 
 	return nil
 }
-
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) error {
 	request := &pb.RegisterRequest{
