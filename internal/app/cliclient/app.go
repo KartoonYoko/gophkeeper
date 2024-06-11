@@ -2,6 +2,7 @@ package cliclient
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/KartoonYoko/gophkeeper/internal/controller/cliclient"
@@ -53,6 +54,7 @@ func Run() {
 	}
 }
 
+// NewServerConnection конструктор
 func NewServerConnection(tokenstore *clientstorage.Storage) (*ServerConnection, error) {
 	sc := new(ServerConnection)
 
@@ -111,30 +113,37 @@ func (sc *ServerConnection) refreshTokenInterpector(ctx context.Context, method 
 
 	err := invoker(ctx, method, req, reply, cc, opts...)
 
-	if e, ok := status.FromError(err); ok {
-		if e.Code() == codes.Unauthenticated {
-			at, rt, err := sc.tokenstore.GetTokens()
-			if err != nil {
-				return status.Error(codes.Unauthenticated, err.Error())
-			}
-
-			res, err := sc.client.RefreshToken(ctx, &pb.RefreshTokenRequest{
-				Token: &pb.Token{
-					AccessToken:  at,
-					RefreshToken: rt,
-				},
-			})
-			if err != nil {
-				return status.Error(codes.Unauthenticated, err.Error())
-			}
-
-			err = sc.tokenstore.UpdateTokens(res.Token.AccessToken, res.Token.RefreshToken)
-			if err != nil {
-				return status.Error(codes.Unauthenticated, err.Error())
-			}
-
-			err = invoker(ctx, method, req, reply, cc, opts...)
+	if err != nil {
+		e, ok := status.FromError(err)
+		if !ok {
+			return err
 		}
+
+		if e.Code() != codes.Unauthenticated {
+			return err
+		}
+
+		at, rt, err := sc.tokenstore.GetTokens()
+		if err != nil {
+			return status.Error(codes.Unauthenticated, fmt.Sprintf("client failed refresh tokens: %s", err))
+		}
+
+		res, err := sc.client.RefreshToken(ctx, &pb.RefreshTokenRequest{
+			Token: &pb.Token{
+				AccessToken:  at,
+				RefreshToken: rt,
+			},
+		})
+		if err != nil {
+			return status.Error(codes.Unauthenticated, fmt.Sprintf("client failed refresh tokens: %s", err))
+		}
+
+		err = sc.tokenstore.UpdateTokens(res.Token.AccessToken, res.Token.RefreshToken)
+		if err != nil {
+			return status.Error(codes.Unauthenticated, fmt.Sprintf("client failed refresh tokens: %s", err))
+		}
+
+		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 
 	return err

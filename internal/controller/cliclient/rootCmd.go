@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,7 @@ Complete documentation is available at https://github.com/KartoonYoko/gophkeeper
 		cmd.Println("Syncronizing...")
 		err := controller.ucstore.Synchronize(cmd.Context())
 		if err != nil {
-			var serror *clientstore.ServerError
+			var serror *uccommon.ServerError
 			if errors.As(err, &serror) {
 				cmd.Printf("got server error: %v\n\n", serror.Err)
 				return

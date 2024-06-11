@@ -3,7 +3,7 @@ package cliclient
 import (
 	"errors"
 
-	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"github.com/spf13/cobra"
 )
 
@@ -52,7 +52,7 @@ var dataUpdateCmd = &cobra.Command{
 		// TODO get data type and by type decide what method to use
 		err = controller.ucstore.UpdateTextData(ctx, dataid, text)
 		if err != nil {
-			var serror *clientstore.ServerError
+			var serror *uccommon.ServerError
 			if errors.As(err, &serror) {
 				cmd.Printf("Successfull updated locally, but got server error: %s. ", serror.Err)
 				return

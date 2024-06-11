@@ -3,7 +3,7 @@ package cliclient
 import (
 	"errors"
 
-	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +41,7 @@ var dataDeleteCmd = &cobra.Command{
 
 		err = controller.ucstore.RemoveDataByID(ctx, dataid)
 		if err != nil {
-			var serror *clientstore.ServerError
+			var serror *uccommon.ServerError
 			if errors.As(err, &serror) {
 				cmd.Printf("Successfull deleted locally, but got server error: %s. ", serror.Err)
 				return

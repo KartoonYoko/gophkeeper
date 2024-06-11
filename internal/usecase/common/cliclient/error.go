@@ -1,4 +1,5 @@
-package clientstore
+package cliclient
+
 
 import "fmt"
 

@@ -11,6 +11,8 @@ import (
 	"github.com/KartoonYoko/gophkeeper/internal/storage/clientstorage"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
+
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 )
 
 type Usecase struct {
@@ -77,7 +79,7 @@ func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
 	}
 	_, err = uc.client.SaveData(ctx, rr)
 	if err != nil {
-		return NewServerError(err)
+		return uccommon.NewServerError(err)
 	}
 
 	return nil
@@ -160,7 +162,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	// get remote metadata list
 	remoteLst, err := uc.client.GetMetaDataList(ctx, &pb.GetMetaDataListRequest{})
 	if err != nil {
-		return NewServerError(err)
+		return uccommon.NewServerError(err)
 	}
 
 	// get local metadata list
@@ -238,7 +240,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	// обработка полученных списков
 	for _, id := range idsToDeleteLocal {
 		err = uc.storage.RemoveDataByID(ctx, clientstorage.RemoveDataByIDRequestModel{
-			DataID: id,
+			DataID:                id,
 			ModificationTimestamp: uc.getModificationTimestamp(),
 		})
 		if err != nil {
@@ -248,7 +250,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	for _, id := range idsToDeleteRemote {
 		_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{Id: id})
 		if err != nil {
-			return NewServerError(err)
+			return uccommon.NewServerError(err)
 		}
 	}
 	for _, id := range idsToAddLocal {
@@ -286,7 +288,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		}
 		_, err = uc.client.SaveData(ctx, r)
 		if err != nil {
-			return NewServerError(err)
+			return uccommon.NewServerError(err)
 		}
 	}
 	for _, id := range idsToUpdateLocal {
@@ -321,7 +323,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		}
 		_, err = uc.client.UpdateData(ctx, r)
 		if err != nil {
-			return NewServerError(err)
+			return uccommon.NewServerError(err)
 		}
 	}
 	return nil
@@ -354,7 +356,7 @@ func (uc *Usecase) UpdateTextData(ctx context.Context, dataid string, text strin
 		Data:                  encrypted,
 	})
 	if err != nil {
-		return NewServerError(err)
+		return uccommon.NewServerError(err)
 	}
 
 	return nil
@@ -370,7 +372,7 @@ func (uc *Usecase) RemoveDataByID(ctx context.Context, dataid string) error {
 	}
 	_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{Id: dataid})
 	if err != nil {
-		return NewServerError(err)
+		return uccommon.NewServerError(err)
 	}
 
 	return nil

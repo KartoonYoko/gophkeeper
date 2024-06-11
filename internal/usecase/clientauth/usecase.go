@@ -6,6 +6,7 @@ import (
 
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/storage/clientstorage"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -65,17 +66,19 @@ func (uc *Usecase) Logout(ctx context.Context) error {
 		return err
 	}
 
+	err = uc.storage.RemoveTokens()
+	if err != nil {
+		return err
+	}
+
 	request := &pb.LogoutRequest{
 		RefreshToken: rt,
 	}
 	_, err = uc.client.Logout(ctx, request)
 	if err != nil {
-		return err
-	}
-
-	err = uc.storage.RemoveTokens()
-	if err != nil {
-		return err
+		// TODO продумать дополнительную команду, которая разлогинивает локально:
+		// для тех случаев, когда сервер не отвечает
+		return cliclient.NewServerError(err)
 	}
 
 	return nil

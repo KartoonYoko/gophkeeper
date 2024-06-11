@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
+	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +48,7 @@ var dataCreateCmd = &cobra.Command{
 			}
 			err = controller.ucstore.CreateTextData(ctx, text)
 			if err != nil {
-				var serror *clientstore.ServerError
+				var serror *uccommon.ServerError
 				if errors.As(err, &serror) {
 					cmd.Printf("Successfull created locally, but got server error: %s. ", serror.Err)
 					return
