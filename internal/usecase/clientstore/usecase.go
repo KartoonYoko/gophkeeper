@@ -77,7 +77,7 @@ func (uc *Usecase) CreateTextData(ctx context.Context, text string) error {
 	}
 	_, err = uc.client.SaveData(ctx, rr)
 	if err != nil {
-		return err
+		return NewServerError(err)
 	}
 
 	return nil
@@ -123,6 +123,8 @@ func (uc *Usecase) GetDataByID(ctx context.Context, id string) (*clientstorage.G
 		return nil, err
 	}
 
+	// TODO подумать как обходиться с разными типами данных;
+	// скорее всего жто должен делать контроллер, вызывая для разных типов данных разные методы
 	return res, nil
 }
 
@@ -158,7 +160,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	// get remote metadata list
 	remoteLst, err := uc.client.GetMetaDataList(ctx, &pb.GetMetaDataListRequest{})
 	if err != nil {
-		return err
+		return NewServerError(err)
 	}
 
 	// get local metadata list
@@ -235,7 +237,10 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 
 	// обработка полученных списков
 	for _, id := range idsToDeleteLocal {
-		err = uc.storage.RemoveDataByID(ctx, id)
+		err = uc.storage.RemoveDataByID(ctx, clientstorage.RemoveDataByIDRequestModel{
+			DataID: id,
+			ModificationTimestamp: uc.getModificationTimestamp(),
+		})
 		if err != nil {
 			return err
 		}
@@ -243,7 +248,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 	for _, id := range idsToDeleteRemote {
 		_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{Id: id})
 		if err != nil {
-			return err
+			return NewServerError(err)
 		}
 	}
 	for _, id := range idsToAddLocal {
@@ -281,7 +286,7 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		}
 		_, err = uc.client.SaveData(ctx, r)
 		if err != nil {
-			return err
+			return NewServerError(err)
 		}
 	}
 	for _, id := range idsToUpdateLocal {
@@ -316,9 +321,58 @@ func (uc *Usecase) Synchronize(ctx context.Context) error {
 		}
 		_, err = uc.client.UpdateData(ctx, r)
 		if err != nil {
-			return err
+			return NewServerError(err)
 		}
 	}
+	return nil
+}
+
+func (uc *Usecase) UpdateTextData(ctx context.Context, dataid string, text string) error {
+	// формируем данные для обновления
+	cipher, err := uc.getDataCipher()
+	if err != nil {
+		return err
+	}
+	encrypted := cipher.Encrypt([]byte(text))
+	hash := uc.getDataHash([]byte(text))
+	modts := uc.getModificationTimestamp()
+
+	err = uc.storage.UpdateData(ctx, clientstorage.UpdateDataRequestModel{
+		ID:                    dataid,
+		Hash:                  hash,
+		ModificationTimestamp: modts,
+		Data:                  encrypted,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = uc.client.UpdateData(ctx, &pb.UpdateDataRequest{
+		Id:                    dataid,
+		Hash:                  hash,
+		ModificationTimestamp: modts,
+		Data:                  encrypted,
+	})
+	if err != nil {
+		return NewServerError(err)
+	}
+
+	return nil
+}
+
+func (uc *Usecase) RemoveDataByID(ctx context.Context, dataid string) error {
+	err := uc.storage.RemoveDataByID(ctx, clientstorage.RemoveDataByIDRequestModel{
+		DataID:                dataid,
+		ModificationTimestamp: uc.getModificationTimestamp(),
+	})
+	if err != nil {
+		return err
+	}
+	_, err = uc.client.RemoveData(ctx, &pb.RemoveDataRequest{Id: dataid})
+	if err != nil {
+		return NewServerError(err)
+	}
+
 	return nil
 }
 
@@ -343,11 +397,6 @@ func (uc *Usecase) getModificationTimestamp() int64 {
 func (uc *Usecase) getDataHash(data []byte) string {
 	hash := common.NewDataHasherSHA256().Hash(data)
 	return base64.StdEncoding.EncodeToString(hash)
-}
-
-// checkDataHash сверяет хеш данных. Применять к нешифрованным данным.
-func (uc *Usecase) checkDataHash(data []byte, datahash string) bool {
-	return uc.getDataHash(data) == datahash
 }
 
 func getPBDataTypeFromString(str string) pb.DataTypeEnum {

@@ -250,14 +250,14 @@ func (s *Storage) UpdateData(ctx context.Context, request UpdateDataRequestModel
 	return nil
 }
 
-func (s *Storage) RemoveDataByID(ctx context.Context, id string) error {
-	query := `UPDATE data_store SET is_deleted=1 WHERE id = ?`
-	_, err := s.db.ExecContext(ctx, query, id)
+func (s *Storage) RemoveDataByID(ctx context.Context, request RemoveDataByIDRequestModel) error {
+	query := `UPDATE data_store SET is_deleted=1, modification_timestamp=? WHERE id = ?`
+	_, err := s.db.ExecContext(ctx, query, request.ModificationTimestamp, request.DataID)
 	if err != nil {
 		return err
 	}
 
-	return os.Remove(s.getDataPathWithName(id))
+	return os.Remove(s.getDataPathWithName(request.DataID))
 }
 
 func (s *Storage) getTokensPath() string {

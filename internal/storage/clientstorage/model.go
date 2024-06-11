@@ -44,6 +44,11 @@ type GetDataByIDResponseModel struct {
 	Data                  []byte
 }
 
+type RemoveDataByIDRequestModel struct {
+	DataID                string
+	ModificationTimestamp int64
+}
+
 type credentialsFile struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
