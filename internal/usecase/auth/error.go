@@ -1,6 +1,9 @@
 package auth
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // LoginAlreadyExistsError говорит о том, что логин уже существует в БД
 type LoginAlreadyExistsError struct {
@@ -72,5 +75,22 @@ func (e *RefreshTokenNotFoundError) Error() string {
 	return fmt.Sprintf("token %s not found", e.Token)
 }
 
+// RefreshTokenExpiredError
+type RefreshTokenExpiredError struct {
+	Token string
+	ExpiredAt time.Time
+}
 
+// NewRefreshTokenNotFoundError конструктор
+func NewRefreshTokenExpiredError(token string, expiredAt time.Time) *RefreshTokenExpiredError {
+	return &RefreshTokenExpiredError{
+		Token: token,
+		ExpiredAt: expiredAt,
+	}
+}
+
+// Error релизует интерфейс error
+func (e *RefreshTokenExpiredError) Error() string {
+	return fmt.Sprintf("token %s expired at %s", e.Token, e.ExpiredAt)
+}
 

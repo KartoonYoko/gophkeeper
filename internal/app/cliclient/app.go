@@ -62,8 +62,7 @@ func NewServerConnection(tokenstore *clientstorage.Storage) (*ServerConnection, 
 	conn, err := grpc.NewClient(
 		":8080",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(sc.authInterpector),
-		grpc.WithUnaryInterceptor(sc.refreshTokenInterpector))
+		grpc.WithChainUnaryInterceptor(sc.authInterpector, sc.refreshTokenInterpector))
 
 	if err != nil {
 		log.Fatal(err)

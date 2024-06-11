@@ -86,7 +86,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 	response := &model.RegisterResponseModel{
 		RefreshToken: rt,
 		UserID:       userID,
-		SecretKey: secretkey,
+		SecretKey:    secretkey,
 	}
 
 	return response, nil
@@ -165,7 +165,7 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 
 	// проверить время жизни токена
 	if tkn.ExpiredAt.Before(time.Now().UTC()) {
-		return nil, fmt.Errorf("refresh token expired")
+		return nil, NewRefreshTokenExpiredError(refreshToken, tkn.ExpiredAt)
 	}
 
 	newTkn, err := uccommon.GenerateRefreshToken()

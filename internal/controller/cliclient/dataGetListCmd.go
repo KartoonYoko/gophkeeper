@@ -3,11 +3,11 @@ package cliclient
 import "github.com/spf13/cobra"
 
 func init() {
-	dataGetCmd.AddCommand(dataGetListCmd)
+	dataCmd.AddCommand(dataGetListCmd)
 }
 
 var dataGetListCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "getlist",
 	Short: "Get list of all data",
 	Long:  `Get list of all data`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,7 +23,7 @@ var dataGetListCmd = &cobra.Command{
 
 		cmd.Printf("%-40s %-10s %-10s\n", "ID", "DATATYPE", "DESCRIPTION")
 		for _, item := range list {
-			cmd.Printf("%-40s %-10s %-10s\n", item.ID, item.Datatype, item.Description)			
+			cmd.Printf("%-40s %-10s %-10s\n", item.ID, item.Datatype, item.Description)
 		}
 	},
 }
