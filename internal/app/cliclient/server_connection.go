@@ -24,11 +24,11 @@ type ServerConnection struct {
 }
 
 // NewServerConnection конструктор
-func NewServerConnection(tokenstore *clientstorage.Storage) (*ServerConnection, error) {
+func NewServerConnection(conf *Config, tokenstore *clientstorage.Storage) (*ServerConnection, error) {
 	sc := new(ServerConnection)
 
 	conn, err := grpc.NewClient(
-		":8080",
+		conf.ServerAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(sc.authInterpector, sc.refreshTokenInterpector))
 

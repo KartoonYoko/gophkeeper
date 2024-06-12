@@ -15,13 +15,18 @@ func Run() {
 	// todo собрать приложение
 	ctx := context.Background()
 
+	conf, err := NewConfig()
+	if err != nil {
+		log.Fatalf("config err: %s", err)
+	}
+
 	tokenstore, err := clientstorage.New(ctx)
 	if err != nil {
 		log.Fatalf("failed init store: %v", err)
 	}
 	defer tokenstore.Close()
 
-	sc, err := NewServerConnection(tokenstore)
+	sc, err := NewServerConnection(conf, tokenstore)
 	if err != nil {
 		log.Fatal(err)
 	}
