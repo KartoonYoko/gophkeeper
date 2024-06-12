@@ -12,7 +12,6 @@ import (
 
 func Run() {
 	var err error
-	// todo собрать приложение
 	ctx := context.Background()
 
 	conf, err := NewConfig()

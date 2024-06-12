@@ -10,6 +10,36 @@ services:
       - 9001:9001
     volumes:
       - minio-vm:/data
+  
+  server-app:
+    build:
+      context: ../
+      dockerfile: ./build/package/Dockerfile
+    environment:
+      - SERVER_ADDRESS=:8080
+      - DATABASE_DSN=host=server-db user=gophkeeperuser password=supersecretpasswd dbname=gophkeeper port=5432 sslmode=disable
+      - MINIO_ADDRESS=minio:9000
+      - MINIO_ACCESS_KEY=gophkeeper
+      - MINIO_SECRET_KEY=supersecret
+      - JWT_SECRET_KEY=somesecretjwtkey
+      - JWT_LIFETIME_MINUTES=60
+      - JWT_REFRESH_LIFETIME_MINUTES=34560
+      - USER_SECRET_KEY_SECURE=supersecret
+      - DATA_SECRET_KEY_SECURE=supersecret
+    ports:
+      - 8080:8080
+
+  server-db:
+    image: postgres:16.3-alpine3.20
+    environment:
+      POSTGRES_DB: "gophkeeper"
+      POSTGRES_USER: "gophkeeperuser"
+      POSTGRES_PASSWORD: "supersecretpasswd"
+    volumes:
+      - gophkeeperdb-data-vm:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
 volumes:
   minio-vm:
+  gophkeeperdb-data-vm:
