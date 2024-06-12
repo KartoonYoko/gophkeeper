@@ -2,6 +2,7 @@ package cliclient
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -84,6 +85,9 @@ func (c *Config) setFromConfigFile() error {
 	}
 	f, err := os.Open(c.ConfigFileName)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
 		return fmt.Errorf("can not open config file: %w", err)
 	}
 	defer f.Close()
