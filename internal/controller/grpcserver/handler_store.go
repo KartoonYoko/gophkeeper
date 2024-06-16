@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
+// SaveData сохранит данные в хранилище
 func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.SaveDataResponse, error) {
 	userID, err := c.getUserIDFromContext(ctx)
 	if err != nil {
@@ -46,6 +46,7 @@ func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.S
 	return response, nil
 }
 
+// GetDataByID возвращает данные из хранилища по ID
 func (c *Controller) GetDataByID(ctx context.Context, r *pb.GetDataByIDRequest) (*pb.GetDataByIDResponse, error) {
 	userID, err := c.getUserIDFromContext(ctx)
 	if err != nil {
@@ -77,6 +78,7 @@ func (c *Controller) GetDataByID(ctx context.Context, r *pb.GetDataByIDRequest) 
 	return response, nil
 }
 
+// UpdateData обновляет данные в хранилище
 func (c *Controller) UpdateData(ctx context.Context, r *pb.UpdateDataRequest) (*pb.UpdateDataResponse, error) {
 	userID, err := c.getUserIDFromContext(ctx)
 	if err != nil {
@@ -100,6 +102,7 @@ func (c *Controller) UpdateData(ctx context.Context, r *pb.UpdateDataRequest) (*
 	return &pb.UpdateDataResponse{}, nil
 }
 
+// RemoveData помечает данные в хранилище удалёнными
 func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*pb.RemoveDataResponse, error) {
 	userID, err := c.getUserIDFromContext(ctx)
 	if err != nil {
@@ -120,6 +123,7 @@ func (c *Controller) RemoveData(ctx context.Context, r *pb.RemoveDataRequest) (*
 	return &pb.RemoveDataResponse{}, nil
 }
 
+// GetMetaDataList возвращает список метаданных
 func (c *Controller) GetMetaDataList(ctx context.Context, r *pb.GetMetaDataListRequest) (*pb.GetMetaDataListResponse, error) {
 	userID, err := c.getUserIDFromContext(ctx)
 	if err != nil {

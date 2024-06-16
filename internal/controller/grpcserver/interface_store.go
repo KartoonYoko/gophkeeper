@@ -7,6 +7,7 @@ import (
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/store"
 )
 
+// StoreUsecase usecase для ручек хранилища
 type StoreUsecase interface {
 	SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.SaveDataResponseModel, error)
 	UpdateData(ctx context.Context, request *model.UpdateDataRequestModel) (*model.UpdateDataResponseModel, error)

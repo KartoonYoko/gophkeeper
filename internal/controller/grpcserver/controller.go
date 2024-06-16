@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Controller контроллер gRPC сервера
 type Controller struct {
 	usecaseAuth  AuthUsecase
 	usecaseStore StoreUsecase
@@ -24,6 +25,7 @@ type Controller struct {
 	pb.StoreServiceServer
 }
 
+// New создает новый контроллер gRPC сервера
 func New(conf Config, usecaseAuth AuthUsecase, usecaseStore StoreUsecase) *Controller {
 	c := new(Controller)
 	c.conf = conf
@@ -44,6 +46,7 @@ func (c *Controller) getUserIDFromContext(ctx context.Context) (string, error) {
 	return userID, nil
 }
 
+// Serve запустить gRPC сервер
 func (c *Controller) Serve(ctx context.Context) error {
 	_, cancel := context.WithCancel(ctx)
 	defer cancel()

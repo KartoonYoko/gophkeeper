@@ -1,4 +1,4 @@
 /*
-Package controller/grpcserver provides gRPC server for gophkeeper.
+Package controller/grpcserver релизует интерфейсный слой серверного приложения
 */
 package grpcserver
