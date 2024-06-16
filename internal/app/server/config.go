@@ -81,7 +81,7 @@ func (c *Config) setFromEnv() error {
 	}
 
 	if !c.wasSetMinioAccessKeyID {
-		envValue, ok := os.LookupEnv("MINIO_ACCESS_KEY_ID")
+		envValue, ok := os.LookupEnv("MINIO_ACCESS_KEY")
 		c.wasSetMinioAccessKeyID = ok
 		if ok {
 			c.MinioAccessKeyID = envValue

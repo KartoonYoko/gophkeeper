@@ -33,7 +33,10 @@ func Run() {
 	}
 
 	{
-		logger.Log.Info("database dsn", zap.Any("dsn", fmt.Sprintf("%v", config)))
+		logger.Log.Info("database dsn",
+			zap.String("minio_address", config.MinioAddress),
+			zap.String("minio_access_key", config.MinioAccessKeyID),
+			zap.String("minio_secret_key", config.MinioSecretAccessKey))
 	}
 
 	// storage
