@@ -111,6 +111,9 @@ func (sc *ServerConnection) refreshTokenInterpector(ctx context.Context, method 
 			return status.Error(codes.Unauthenticated, fmt.Sprintf("client failed refresh tokens: %s", err))
 		}
 
+		md := metadata.New(map[string]string{"Authorization": res.Token.AccessToken})
+		ctx = metadata.NewOutgoingContext(ctx, md)
+
 		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 
