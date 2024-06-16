@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 )
 
+// GenerateRefreshToken генерирует рефреш токен
 func GenerateRefreshToken() (string, error) {
 	n := 16
 	b := make([]byte, n)

@@ -8,14 +8,17 @@ import (
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientversion"
 )
 
+// Controller контроллер клиентского приложения
 type Controller struct {
 	ucauth    *clientauth.Usecase
 	ucstore   *clientstore.Usecase
 	ucversion *clientversion.Usecase
 }
 
+// controller экземпляр контроллера
 var controller Controller
 
+// New ининциализирует экземпляр контроллера в пакете
 func New(
 	ucauth *clientauth.Usecase,
 	ucstore *clientstore.Usecase,
@@ -29,6 +32,7 @@ func New(
 	return &controller
 }
 
+// Serve запустить обработку cli команд
 func (c *Controller) Serve(ctx context.Context) error {
 	if err := root.Execute(); err != nil {
 		return err

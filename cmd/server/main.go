@@ -1,3 +1,6 @@
+/*
+Package main пакет для запуска серверного приложения
+*/
 package main
 
 import (

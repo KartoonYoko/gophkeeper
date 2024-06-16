@@ -17,6 +17,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Run запуск серверного приложения
 func Run() {
 	ctx := context.Background()
 

@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 )
 
+// SecretKeyHandler реализует шифрование секретного ключа пользователя
 type SecretKeyHandler struct {
 	aeskey []byte
 	nonce  []byte
@@ -43,11 +44,13 @@ func NewSecretKeyHandler(key string) (*SecretKeyHandler, error) {
 	return h, nil
 }
 
+// Encrypt шифрует секретный ключ
 func (h *SecretKeyHandler) Encrypt(secretkey string) (encryptedname string, err error) {
 	dst := h.aesgcm.Seal(nil, h.nonce, []byte(secretkey), nil)
 	return hex.EncodeToString(dst), nil
 }
 
+// Decrypt дешифрует секретный ключ
 func (h *SecretKeyHandler) Decrypt(encrypted string) (encryptedname string, err error) {
 	encd, err := hex.DecodeString(encrypted)
 	if err != nil {
@@ -62,6 +65,7 @@ func (h *SecretKeyHandler) Decrypt(encrypted string) (encryptedname string, err 
 	return string(dst), nil
 }
 
+// GenerateEncryptedSecretKey генерирует и шифрует секретный ключ
 func (h *SecretKeyHandler) GenerateEncryptedSecretKey() (string, error) {
 	sc, err := generateSecretKey()
 	if err != nil {

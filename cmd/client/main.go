@@ -1,3 +1,6 @@
+/* 
+Package main пакет для запуска клиентского приложения
+*/
 package main
 
 import (

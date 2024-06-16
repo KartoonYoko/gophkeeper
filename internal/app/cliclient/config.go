@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// Config конфигурация клиентского приложения
 type Config struct {
 	ServerAddress  string // адрес сервера; флаг a
 	ConfigFileName string // имя конфигурационного файла; флаг c
@@ -21,6 +22,7 @@ type configFileJSON struct {
 	ServerAddress *string `json:"server_address"` // аналог переменной окружения SERVER_ADDRESS или флага -a
 }
 
+// NewConfig собирает конфигурацию из флагов командной строки, переменных среды
 func NewConfig() (*Config, error) {
 	c := new(Config)
 
