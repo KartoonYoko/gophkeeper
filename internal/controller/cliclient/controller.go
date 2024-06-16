@@ -5,19 +5,25 @@ import (
 
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientauth"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientversion"
 )
 
 type Controller struct {
-	ucauth  *clientauth.Usecase
-	ucstore *clientstore.Usecase
+	ucauth    *clientauth.Usecase
+	ucstore   *clientstore.Usecase
+	ucversion *clientversion.Usecase
 }
 
 var controller Controller
 
-func New(ucauth *clientauth.Usecase, ucstore *clientstore.Usecase) *Controller {
+func New(
+	ucauth *clientauth.Usecase,
+	ucstore *clientstore.Usecase,
+	ucversion *clientversion.Usecase) *Controller {
 	controller = Controller{
-		ucauth:  ucauth,
-		ucstore: ucstore,
+		ucauth:    ucauth,
+		ucstore:   ucstore,
+		ucversion: ucversion,
 	}
 
 	return &controller

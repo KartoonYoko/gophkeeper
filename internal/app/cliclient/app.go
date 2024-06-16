@@ -8,9 +8,14 @@ import (
 	"github.com/KartoonYoko/gophkeeper/internal/storage/clientstorage"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientauth"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientversion"
 )
 
-func Run() {
+func Run(vi *VersionInfo) {
+	if vi == nil {
+		vi = &VersionInfo{}
+	}
+
 	var err error
 	ctx := context.Background()
 
@@ -34,8 +39,9 @@ func Run() {
 	// usecases
 	ucauth := clientauth.New(sc.conn, tokenstore)
 	ucstore := clientstore.New(sc.conn, tokenstore)
+	ucversion := clientversion.New(vi.Version, vi.BuildDate)
 
-	controller := cliclient.New(ucauth, ucstore)
+	controller := cliclient.New(ucauth, ucstore, ucversion)
 
 	err = controller.Serve(ctx)
 	if err != nil {
