@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/KartoonYoko/gophkeeper/internal/logger"
+	"go.uber.org/zap"
 )
 
 // Config - конфигурация для серверной части
@@ -53,9 +56,10 @@ func NewConfig() (*Config, error) {
 func (c *Config) setFromEnv() error {
 	if !c.wasSetServerAddress {
 		envValue, ok := os.LookupEnv("SERVER_ADDRESS")
-		c.wasSetDatabaseDsn = ok
+		c.wasSetServerAddress = ok
 		if ok {
 			c.ServerAddress = envValue
+			logger.Log.Info("server address was set from env", zap.String("address", c.ServerAddress))
 		}
 	}
 
@@ -64,6 +68,7 @@ func (c *Config) setFromEnv() error {
 		c.wasSetDatabaseDsn = ok
 		if ok {
 			c.DatabaseDsn = envValue
+			logger.Log.Info("server database dsn was set from env", zap.String("dsn", c.DatabaseDsn))
 		}
 	}
 
@@ -91,7 +96,6 @@ func (c *Config) setFromEnv() error {
 		}
 	}
 
-	// -----
 	if !c.wasSetSecretJWTKey {
 		envValue, ok := os.LookupEnv("JWT_SECRET_KEY")
 		c.wasSetSecretJWTKey = ok

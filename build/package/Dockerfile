@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -C cmd/server -a -installsuffix cgo -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -C cmd/server -a -o main .
 
 FROM alpine:3.20  
 WORKDIR /root/

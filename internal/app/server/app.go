@@ -32,6 +32,10 @@ func Run() {
 		return
 	}
 
+	{
+		logger.Log.Info("database dsn", zap.Any("dsn", fmt.Sprintf("%v", config)))
+	}
+
 	// storage
 	psConf := storagePostgres.Config{
 		ConnectionString: config.DatabaseDsn,
