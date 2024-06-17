@@ -41,6 +41,7 @@ require (
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/sethvargo/go-retry v0.2.4 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	go.uber.org/mock v0.4.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect

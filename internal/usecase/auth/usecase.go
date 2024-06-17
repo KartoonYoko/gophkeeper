@@ -15,7 +15,8 @@ import (
 )
 
 type Usecase struct {
-	storage Storager
+	// Storage хранилище данных; пришлось сделать экспортируемым для моков
+	Storage Storager
 	conf    Config
 
 	pswdHasher       *appcommon.SHA256PasswordHasher
@@ -27,7 +28,7 @@ func New(storage Storager, config Config) (*Usecase, error) {
 	uc := new(Usecase)
 
 	uc.conf = config
-	uc.storage = storage
+	uc.Storage = storage
 	uc.pswdHasher = appcommon.NewSHA256PasswordHasher()
 	uc.secretkeyHandler, err = appcommon.NewSecretKeyHandler(uc.conf.SecretKeySecure)
 	if err != nil {
@@ -54,7 +55,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 		UserID:    userID,
 		SecretKey: sc,
 	}
-	_, err = uc.storage.CreateUser(ctx, createUserRequest)
+	_, err = uc.Storage.CreateUser(ctx, createUserRequest)
 	if err != nil {
 		var exsterror *serror.LoginAlreadyExistsError
 		if errors.As(err, &exsterror) {
@@ -73,7 +74,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 		TokenID:   rt,
 		ExpiredAt: uc.refreshTokenExpiredAt(),
 	}
-	_, err = uc.storage.CreateRefreshToken(ctx, createRefreshTokenRequest)
+	_, err = uc.Storage.CreateRefreshToken(ctx, createRefreshTokenRequest)
 	if err != nil {
 		// todo удалить пользователя
 		return nil, fmt.Errorf("failed create refresh token: %w", err)
@@ -98,7 +99,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 	// если невалидный, то вернуть ошибку serror.LoginOrPasswordNotFoundError
 	// иначе создать рефреш токен для пользователя
 
-	getUserResponse, err := uc.storage.GetUserByLogin(ctx, login)
+	getUserResponse, err := uc.Storage.GetUserByLogin(ctx, login)
 	if err != nil {
 		var exsterror *serror.LoginNotFoundError
 		if errors.As(err, &exsterror) {
@@ -122,7 +123,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 		TokenID:   tokenID,
 		ExpiredAt: uc.refreshTokenExpiredAt(),
 	}
-	_, err = uc.storage.CreateRefreshToken(ctx, addRefreshTokenRequest)
+	_, err = uc.Storage.CreateRefreshToken(ctx, addRefreshTokenRequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create refresh token: %w", err)
 	}
@@ -136,7 +137,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 }
 
 func (uc *Usecase) Logout(ctx context.Context, userID string, tokenID string) error {
-	err := uc.storage.RemoveRefreshToken(ctx, userID, tokenID)
+	err := uc.Storage.RemoveRefreshToken(ctx, userID, tokenID)
 	if err != nil {
 		return fmt.Errorf("failed to logout: %w", err)
 	}
@@ -153,7 +154,7 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 	r := &smodel.GetRefreshTokenRequestModel{
 		TokenID: refreshToken,
 	}
-	tkn, err := uc.storage.GetRefreshToken(ctx, r)
+	tkn, err := uc.Storage.GetRefreshToken(ctx, r)
 	if err != nil {
 		// если токена не существует, то вернуть ошибку
 		var notfound *serror.NotFoundError
@@ -174,7 +175,7 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 	}
 	tknExpiredAt := uc.refreshTokenExpiredAt()
 
-	utkn, err := uc.storage.UpdateRefreshToken(ctx, tkn.TokenID, newTkn, tknExpiredAt)
+	utkn, err := uc.Storage.UpdateRefreshToken(ctx, tkn.TokenID, newTkn, tknExpiredAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to refresh token: %w", err)
 	}
