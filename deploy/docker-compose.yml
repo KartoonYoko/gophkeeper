@@ -28,6 +28,9 @@ services:
       DATA_SECRET_KEY_SECURE: "supersecret"
     ports:
       - 8080:8080
+    depends_on:
+      - server-db
+      - minio
 
   server-db:
     image: postgres:16.3-alpine3.20
