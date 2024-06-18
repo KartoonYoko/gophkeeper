@@ -47,7 +47,7 @@ var loginCmd = &cobra.Command{
 				return
 			}
 		}
-		
+
 		// ввод пароля
 		fpassword, err := cmd.Flags().GetString("login")
 		if err != nil {

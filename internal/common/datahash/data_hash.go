@@ -14,7 +14,6 @@ func NewDataHasherSHA256() *DataHasherSHA256 {
 
 func (h *DataHasherSHA256) Hash(data []byte) []byte {
 	sha := sha256.New()
-    sha.Write(data)
-    return sha.Sum(nil)
+	sha.Write(data)
+	return sha.Sum(nil)
 }
-

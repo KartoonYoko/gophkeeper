@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
-	ucstore "github.com/KartoonYoko/gophkeeper/internal/usecase/store"
 	"github.com/KartoonYoko/gophkeeper/internal/common/datacipher"
 	"github.com/KartoonYoko/gophkeeper/internal/common/passwordhash"
 	"github.com/KartoonYoko/gophkeeper/internal/common/secretkeycipher"
+	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
+	ucstore "github.com/KartoonYoko/gophkeeper/internal/usecase/store"
 )
 
 var (
@@ -85,6 +85,6 @@ func encrypteData(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return h.Encrypt(data), nil
 }

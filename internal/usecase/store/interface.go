@@ -25,5 +25,4 @@ type FileStorager interface {
 type DataCipherHandler interface {
 	Encrypt(data []byte) []byte
 	Decrypt(data []byte) (encryptedname []byte, err error)
-	
 }

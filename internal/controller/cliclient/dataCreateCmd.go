@@ -11,7 +11,7 @@ import (
 
 func init() {
 	dataCreateCmd.Flags().String("datatype", "TEXT", "Set data type that you want create. Possible values: TEXT, CREDENTIALS, BANK_CARD, BINARY.")
-	
+
 	dataCmd.AddCommand(dataCreateCmd)
 }
 
@@ -95,7 +95,7 @@ var dataCreateCmd = &cobra.Command{
 				cmd.PrintErrln(err)
 				return
 			}
-			err = controller.ucstore.CreateCredentialsData(ctx,clientstore.CredentialDataModel{
+			err = controller.ucstore.CreateCredentialsData(ctx, clientstore.CredentialDataModel{
 				Login:    login,
 				Password: password,
 			}, description)
@@ -107,7 +107,7 @@ var dataCreateCmd = &cobra.Command{
 				errorMsg: "Please, enter card number",
 				label:    "Enter card number",
 			}
-			
+
 			cardnumber, err = promptTextInput(pc)
 			if err != nil {
 				cmd.PrintErrln(err)
@@ -123,13 +123,13 @@ var dataCreateCmd = &cobra.Command{
 				cmd.PrintErrln(err)
 				return
 			}
-			err = controller.ucstore.CreateBankCardData(ctx,clientstore.BankCardDataModel{
+			err = controller.ucstore.CreateBankCardData(ctx, clientstore.BankCardDataModel{
 				Number: cardnumber,
-				CVV: cvv,
+				CVV:    cvv,
 			}, description)
 			msg = "Credentials created"
 		}
-		
+
 		if err != nil {
 			var serror *uccommon.ServerError
 			if errors.As(err, &serror) {
@@ -139,7 +139,7 @@ var dataCreateCmd = &cobra.Command{
 			cmd.PrintErrln(err)
 			return
 		} else {
-			cmd.Println(msg)	
+			cmd.Println(msg)
 		}
 	},
 }

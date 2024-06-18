@@ -3,8 +3,8 @@ package grpcserver
 import (
 	"context"
 
-	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/store"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/store"
+	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/store"
 )
 
 // StoreUsecase usecase для ручек хранилища

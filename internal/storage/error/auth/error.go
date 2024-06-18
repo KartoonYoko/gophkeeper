@@ -74,4 +74,3 @@ func (e *NotFoundError) Error() string {
 func (e *NotFoundError) Unwrap() error {
 	return e.Err
 }
-

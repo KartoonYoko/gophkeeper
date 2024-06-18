@@ -33,11 +33,11 @@ type Storager interface {
 
 type PasswordHasher interface {
 	Hash(password string) (string, error)
-	CheckHash(password, hash string) bool 	
+	CheckHash(password, hash string) bool
 }
 
 type SecretKeyHandler interface {
-	Encrypt(secretkey string) (encryptedname string, err error)	
+	Encrypt(secretkey string) (encryptedname string, err error)
 	Decrypt(encrypted string) (encryptedname string, err error)
 	GenerateEncryptedSecretKey() (string, error)
 }

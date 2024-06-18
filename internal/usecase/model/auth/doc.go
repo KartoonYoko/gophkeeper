@@ -1,4 +1,4 @@
 /*
-Package usecase/model/auth модели auth usecase 
+Package usecase/model/auth модели auth usecase
 */
 package auth

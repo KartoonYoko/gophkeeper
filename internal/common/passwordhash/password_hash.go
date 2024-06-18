@@ -24,5 +24,5 @@ func (h *Hasher) Hash(password string) (string, error) {
 
 // CheckHash проверяет хэш пароля
 func (h *Hasher) CheckHash(password, hash string) bool {
-    return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }

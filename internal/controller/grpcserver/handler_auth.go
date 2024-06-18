@@ -65,7 +65,7 @@ func (c *Controller) Logout(ctx context.Context, request *pb.LogoutRequest) (*pb
 }
 
 // RefreshToken обновляет токен доступа
-// 
+//
 // TODO если refresh token недействительный, то возвращать ошибку "неавторизован"
 func (c *Controller) RefreshToken(ctx context.Context, request *pb.RefreshTokenRequest) (*pb.RefreshTokenResponse, error) {
 	res, err := c.usecaseAuth.RefreshToken(ctx, request.Token.RefreshToken)

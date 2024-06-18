@@ -1,6 +1,5 @@
 package cliclient
 
-
 import "fmt"
 
 // ServerError означает, что ошибка была получена при обращении к серверной части
@@ -46,4 +45,3 @@ func (e *TokenNotFoundError) Error() string {
 func (e *TokenNotFoundError) Unwrap() error {
 	return e.Err
 }
-

@@ -27,8 +27,8 @@ func (s *Storage) GetUserByLogin(
 	}
 
 	res := &model.GetUserByLoginResponseModel{
-		UserID:   userID,
-		Password: password,
+		UserID:    userID,
+		Password:  password,
 		SecretKey: secretkey,
 	}
 
@@ -119,4 +119,3 @@ func (s *Storage) UpdateRefreshToken(
 		ExpiredAt: newExpiredAt,
 	}, nil
 }
-

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
 // SaveData сохранит данные в хранилище
 func (c *Controller) SaveData(ctx context.Context, r *pb.SaveDataRequest) (*pb.SaveDataResponse, error) {
 	userID, err := c.getUserIDFromContext(ctx)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/common/jwtclaims"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Builder struct {

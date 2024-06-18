@@ -55,7 +55,7 @@ func (s *Storage) SaveData(ctx context.Context, request *filestoremodel.SaveData
 	if objName == "" {
 		objName = uuid.New().String()
 	}
-	
+
 	reader := bytes.NewReader(request.Data)
 	_, err = s.client.PutObject(
 		ctx,
@@ -93,7 +93,7 @@ func (s *Storage) UpdateData(ctx context.Context, request *filestoremodel.Update
 	if objName == "" {
 		objName = uuid.New().String()
 	}
-	
+
 	reader := bytes.NewReader(request.Data)
 	_, err = s.client.PutObject(
 		ctx,

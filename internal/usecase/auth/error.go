@@ -24,14 +24,14 @@ func (e *LoginAlreadyExistsError) Error() string {
 
 // LoginOrPasswordNotFoundError говорит о том, что логин или пароль не найдены
 type LoginOrPasswordNotFoundError struct {
-	Login string
+	Login    string
 	Password string
 }
 
 // NewLoginOrPasswordNotFoundError конструктор
 func NewLoginOrPasswordNotFoundError(login string, password string) *LoginOrPasswordNotFoundError {
 	return &LoginOrPasswordNotFoundError{
-		Login: login,
+		Login:    login,
 		Password: password,
 	}
 }
@@ -77,14 +77,14 @@ func (e *RefreshTokenNotFoundError) Error() string {
 
 // RefreshTokenExpiredError
 type RefreshTokenExpiredError struct {
-	Token string
+	Token     string
 	ExpiredAt time.Time
 }
 
 // NewRefreshTokenNotFoundError конструктор
 func NewRefreshTokenExpiredError(token string, expiredAt time.Time) *RefreshTokenExpiredError {
 	return &RefreshTokenExpiredError{
-		Token: token,
+		Token:     token,
 		ExpiredAt: expiredAt,
 	}
 }
@@ -93,4 +93,3 @@ func NewRefreshTokenExpiredError(token string, expiredAt time.Time) *RefreshToke
 func (e *RefreshTokenExpiredError) Error() string {
 	return fmt.Sprintf("token %s expired at %s", e.Token, e.ExpiredAt)
 }
-

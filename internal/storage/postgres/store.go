@@ -15,10 +15,10 @@ func (s *Storage) SaveData(ctx context.Context, request *model.SaveDataRequestMo
 	`
 
 	var id string
-	err := s.pool.QueryRow(ctx, query, 
-		request.UserID, 
-		request.BinaryID, 
-		request.Description, 
+	err := s.pool.QueryRow(ctx, query,
+		request.UserID,
+		request.BinaryID,
+		request.Description,
 		request.DataType,
 		request.ID,
 		request.Hash,
@@ -105,14 +105,14 @@ func (s *Storage) GetUserDataList(ctx context.Context, request *model.GetUserDat
 		item := new(model.GetUserDataListResponseItemModel)
 
 		rows.Scan(
-			&item.ID, 
-			&item.Description, 
-			&item.DataType, 
-			&item.Hash, 
-			&item.ModificationTimestamp, 
+			&item.ID,
+			&item.Description,
+			&item.DataType,
+			&item.Hash,
+			&item.ModificationTimestamp,
 			&item.IsDeleted)
 
-			response.Items = append(response.Items, item)
+		response.Items = append(response.Items, item)
 	}
 
 	if rows.Err() != nil {
