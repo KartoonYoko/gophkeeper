@@ -8,11 +8,14 @@ import (
 	"time"
 
 	ucauth "github.com/KartoonYoko/gophkeeper/internal/usecase/auth"
+	ucstore "github.com/KartoonYoko/gophkeeper/internal/usecase/store"
+	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
 )
 
 var (
 	controller           *Controller
 	usecaseAuth          *ucauth.Usecase
+	usecaseStore         *ucstore.Usecase
 	bootstrapAddressgRPC string
 )
 
@@ -54,9 +57,30 @@ func createTestMock() error {
 		return fmt.Errorf("failed to create usecase auth: %w", err)
 	}
 
+	usecaseStore, err = ucstore.New(ucstore.Config{
+		SecretKeySecure: "secretkey",
+		DataSecretKey:   "secretkey",
+	}, nil, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create usecase store: %w", err)
+	}
+
 	controller = New(Config{
 		BootstrapAddress: bootstrapAddressgRPC,
-	}, usecaseAuth, nil)
+	}, usecaseAuth, usecaseStore)
 
 	return nil
+}
+
+func createJWTString(userID string) (string, error) {
+	return usecaseAuth.BuildJWTString(userID)
+}
+
+func encrypteData(data []byte) ([]byte, error) {
+	h, err := appcommon.NewDataCipherHandler("secretkey")
+	if err != nil {
+		return nil, err
+	}
+	
+	return h.Encrypt(data), nil
 }

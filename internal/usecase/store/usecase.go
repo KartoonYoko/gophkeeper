@@ -13,8 +13,10 @@ import (
 type Usecase struct {
 	conf Config
 
-	storage  Storager
-	fstorage FileStorager
+	// хранилище метаданных
+	Storage  Storager
+	// хранилище данных
+	FileStorage FileStorager
 
 	dataCipherHandler *appcommon.DataCipherHandler
 }
@@ -23,8 +25,8 @@ func New(conf Config, storage Storager, fstorager FileStorager) (*Usecase, error
 	var err error
 	uc := new(Usecase)
 
-	uc.storage = storage
-	uc.fstorage = fstorager
+	uc.Storage = storage
+	uc.FileStorage = fstorager
 	uc.conf = conf
 	uc.dataCipherHandler, err = appcommon.NewDataCipherHandler(conf.DataSecretKey)
 	if err != nil {
@@ -49,7 +51,7 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 		Data:   encryptedData,
 		UserID: request.UserID,
 	}
-	sfr, err := uc.fstorage.SaveData(ctx, r)
+	sfr, err := uc.FileStorage.SaveData(ctx, r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save file: %w", err)
 	}
@@ -63,7 +65,7 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 		Hash:                  request.Hash,
 		ModificationTimestamp: request.ModificationTimestamp,
 	}
-	resSaveData, err := uc.storage.SaveData(ctx, rsd)
+	resSaveData, err := uc.Storage.SaveData(ctx, rsd)
 	if err != nil {
 		err = fmt.Errorf("failed to save data: %w", err)
 		// удаляем сохраненный файл
@@ -71,7 +73,7 @@ func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestM
 			UserID: request.UserID,
 			ID:     sfr.ID,
 		}
-		removeDataErr := uc.fstorage.RemoveDataByID(ctx, removeRequest)
+		removeDataErr := uc.FileStorage.RemoveDataByID(ctx, removeRequest)
 		if removeDataErr != nil {
 			err = fmt.Errorf("failed delete not saved data: %w", err)
 		}
@@ -90,7 +92,7 @@ func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRe
 		UserID: request.UserID,
 		ID:     request.ID,
 	}
-	sdr, err := uc.storage.GetDataByID(ctx, srequest)
+	sdr, err := uc.Storage.GetDataByID(ctx, srequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get data: %w", err)
 	}
@@ -100,7 +102,7 @@ func (uc *Usecase) GetDataByID(ctx context.Context, request *model.GetDataByIDRe
 		UserID: request.UserID,
 		ID:     sdr.BinaryID,
 	}
-	gdr, err := uc.fstorage.GetDataByID(ctx, frequest)
+	gdr, err := uc.FileStorage.GetDataByID(ctx, frequest)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get data: %w", err)
 	}
@@ -128,7 +130,7 @@ func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequ
 		Data:   encryptedData,
 		UserID: request.UserID,
 	}
-	_, err := uc.fstorage.SaveData(ctx, r)
+	_, err := uc.FileStorage.SaveData(ctx, r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save file: %w", err)
 	}
@@ -140,7 +142,7 @@ func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequ
 		ModificationTimestamp: request.ModificationTimestamp,
 		Hash:                  request.Hash,
 	}
-	_, err = uc.storage.UpdateData(ctx, rs)
+	_, err = uc.Storage.UpdateData(ctx, rs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update data: %w", err)
 	}
@@ -151,7 +153,7 @@ func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequ
 }
 
 func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveDataByIDRequestModel) (*model.RemoveDataByIDResponseModel, error) {
-	err := uc.storage.RemoveDataByID(ctx, &smodel.RemoveDataByIDRequestModel{
+	err := uc.Storage.RemoveDataByID(ctx, &smodel.RemoveDataByIDRequestModel{
 		ID:     request.ID,
 		UserID: request.UserID,
 		ModificationTimestamp: request.ModificationTimestamp,
@@ -159,7 +161,7 @@ func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveData
 	if err != nil {
 		return nil, fmt.Errorf("failed to remove data from database: %w", err)
 	}
-	err = uc.fstorage.RemoveDataByID(ctx, &sfmodel.RemoveDataByIDRequestModel{
+	err = uc.FileStorage.RemoveDataByID(ctx, &sfmodel.RemoveDataByIDRequestModel{
 		ID:     request.ID,
 		UserID: request.UserID,
 	})
@@ -171,7 +173,7 @@ func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveData
 }
 
 func (uc *Usecase) GetUserDataList(ctx context.Context, userID string) (*smodel.GetUserDataListResponseModel, error) {
-	return uc.storage.GetUserDataList(ctx, &smodel.GetUserDataListRequestModel{
+	return uc.Storage.GetUserDataList(ctx, &smodel.GetUserDataListRequestModel{
 		UserID: userID,
 	})
 }

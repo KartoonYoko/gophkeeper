@@ -163,7 +163,6 @@ func TestController_Logout(t *testing.T) {
 		{
 			name: "Error",
 			prepare: func(m *mocks.MockStorager) {
-				m.EXPECT()
 				m.EXPECT().
 					RemoveRefreshToken(gomock.Any(), gomock.Any(), gomock.Any()).
 					Return(fmt.Errorf("some error of removing refresh token"))
@@ -519,8 +518,4 @@ func TestController_RefreshToken(t *testing.T) {
 
 		})
 	}
-}
-
-func createJWTString(userID string) (string, error) {
-	return usecaseAuth.BuildJWTString(userID)
 }
