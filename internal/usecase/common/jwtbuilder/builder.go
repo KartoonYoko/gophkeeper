@@ -1,40 +1,22 @@
-package common
+package jwtbuilder
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/common/jwtclaims"
 )
 
-func GenerateRefreshToken() (string, error) {
-	n := 16
-	b := make([]byte, n)
-	_, err := rand.Read(b)
-	if err != nil {
-		return ``, err
-	}
-	return base64.StdEncoding.EncodeToString(b), nil
-}
-
-// Claims — структура утверждений, которая включает стандартные утверждения
-// и одно пользовательское — UserID
-type Claims struct {
-	jwt.RegisteredClaims
-	UserID string
-}
-
-type JWTStringBuilder struct {
+type Builder struct {
 	secretKey string
 
 	userID                 string
 	tokenExpiredAtInMinute int
 }
 
-func NewJWTStringBuilder(secretKey string, opts ...func(*JWTStringBuilder)) JWTStringBuilder {
-	o := JWTStringBuilder{}
+func New(secretKey string, opts ...func(*Builder)) Builder {
+	o := Builder{}
 	o.secretKey = secretKey
 
 	for _, opt := range opts {
@@ -44,22 +26,22 @@ func NewJWTStringBuilder(secretKey string, opts ...func(*JWTStringBuilder)) JWTS
 }
 
 // WithUserID — добавляет ID пользователя в токен
-func WithUserID(userID string) func(*JWTStringBuilder) {
-	return func(o *JWTStringBuilder) {
+func WithUserID(userID string) func(*Builder) {
+	return func(o *Builder) {
 		o.userID = userID
 	}
 }
 
 // WithUserID — добавляет ID пользователя в токен
-func WithTokeExpiredAtInMinute(minutes int) func(*JWTStringBuilder) {
-	return func(o *JWTStringBuilder) {
+func WithTokeExpiredAtInMinute(minutes int) func(*Builder) {
+	return func(o *Builder) {
 		o.tokenExpiredAtInMinute = minutes
 	}
 }
 
 // BuildJWTString создаёт токен и возвращает его в виде строки.
-func (b *JWTStringBuilder) BuildJWTString() (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
+func (b *Builder) BuildJWTString() (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtclaims.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * time.Duration(b.tokenExpiredAtInMinute))),
 		},
@@ -84,7 +66,7 @@ func NewJWTStringValidator(secretKey string) JWTStringValidator {
 
 // ValidateAndGetUserID валидирует токен и получает из него UserID
 func (v *JWTStringValidator) ValidateAndGetUserID(tokenString string) (string, error) {
-	claims := &Claims{}
+	claims := &jwtclaims.Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims,
 		func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

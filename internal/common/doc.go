@@ -1,4 +1,4 @@
 /*
-Package common содержит общие струтуры для прижения
+Package common содержит общие пакеты для всего приложения
 */
 package common

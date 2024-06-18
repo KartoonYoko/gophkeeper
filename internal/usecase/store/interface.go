@@ -21,3 +21,9 @@ type FileStorager interface {
 	GetDataByID(ctx context.Context, request *filestoremodel.GetDataByIDRequestModel) (*filestoremodel.GetDataByIDResponseModel, error)
 	RemoveDataByID(ctx context.Context, request *filestoremodel.RemoveDataByIDRequestModel) error
 }
+
+type DataCipherHandler interface {
+	Encrypt(data []byte) []byte
+	Decrypt(data []byte) (encryptedname []byte, err error)
+	
+}

@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KartoonYoko/gophkeeper/internal/common"
+	"github.com/KartoonYoko/gophkeeper/internal/common/datacipher"
+	"github.com/KartoonYoko/gophkeeper/internal/common/datahash"
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	"github.com/KartoonYoko/gophkeeper/internal/storage/clientstorage"
 	"github.com/google/uuid"
@@ -455,12 +456,12 @@ func (uc *Usecase) RemoveDataByID(ctx context.Context, dataid string) error {
 	return nil
 }
 
-func (uc *Usecase) getDataCipher() (*common.DataCipherHandler, error) {
+func (uc *Usecase) getDataCipher() (*datacipher.Handler, error) {
 	sc, err := uc.storage.GetSecretKey()
 	if err != nil {
 		return nil, err
 	}
-	cipher, err := common.NewDataCipherHandler(sc)
+	cipher, err := datacipher.New(sc)
 	if err != nil {
 		return nil, err
 	}
@@ -474,7 +475,7 @@ func (uc *Usecase) getModificationTimestamp() int64 {
 
 // getDataHash возвращает хеш данных. Применять к нешифрованным данным.
 func (uc *Usecase) getDataHash(data []byte) string {
-	hash := common.NewDataHasherSHA256().Hash(data)
+	hash := datahash.NewDataHasherSHA256().Hash(data)
 	return base64.StdEncoding.EncodeToString(hash)
 }
 

@@ -30,15 +30,67 @@ func TestController_SaveData(t *testing.T) {
 
 	c := pb.NewStoreServiceClient(conn)
 
+	type args struct {
+		dataType pb.DataTypeEnum
+	}
 	type test struct {
 		name            string
+		args            args
 		prepare         func(mock *mocks.MockStorager, mf *mocks.MockFileStorager)
 		getJWT          func(userID string) (string, error)
 		statusErrorCode codes.Code
 	}
 	tests := []test{
 		{
-			name: "Success",
+			name: "Success text",
+			args: args{
+				dataType: pb.DataTypeEnum_DATA_TYPE_TEXT,
+			},
+			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) {
+				mf.EXPECT().
+					SaveData(gomock.Any(), gomock.Any()).
+					Return(&sfmodel.SaveDataResponseModel{}, nil)
+				m.EXPECT().
+					SaveData(gomock.Any(), gomock.Any()).
+					Return(&smodel.SaveDataResponseModel{}, nil)
+			},
+			getJWT: createJWTString,
+		},
+		{
+			name: "Success binary",
+			args: args{
+				dataType: pb.DataTypeEnum_DATA_TYPE_BINARY,
+			},
+			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) {
+				mf.EXPECT().
+					SaveData(gomock.Any(), gomock.Any()).
+					Return(&sfmodel.SaveDataResponseModel{}, nil)
+				m.EXPECT().
+					SaveData(gomock.Any(), gomock.Any()).
+					Return(&smodel.SaveDataResponseModel{}, nil)
+			},
+			getJWT: createJWTString,
+		},
+		{
+			name: "Success bank card",
+			args: args{
+				dataType: pb.DataTypeEnum_DATA_TYPE_BANK_CARD,
+			},
+			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) {
+				mf.EXPECT().
+					SaveData(gomock.Any(), gomock.Any()).
+					Return(&sfmodel.SaveDataResponseModel{}, nil)
+				m.EXPECT().
+					SaveData(gomock.Any(), gomock.Any()).
+					Return(&smodel.SaveDataResponseModel{}, nil)
+			},
+			getJWT: createJWTString,
+		},
+		{
+			name: "Success credentials",
+			args: args{
+				dataType: pb.DataTypeEnum_DATA_TYPE_CREDENTIALS,
+			},
 			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) {
 				mf.EXPECT().
 					SaveData(gomock.Any(), gomock.Any()).
@@ -119,7 +171,7 @@ func TestController_SaveData(t *testing.T) {
 			usecaseStore.Storage = m
 
 			request := new(pb.SaveDataRequest)
-			request.Type = pb.DataTypeEnum_DATA_TYPE_TEXT
+			request.Type = tt.args.dataType
 
 			_, err := c.SaveData(requestCtx, request)
 
@@ -525,7 +577,7 @@ func TestController_GetMetaDataList(t *testing.T) {
 
 	tests := []test{
 		{
-			name: "Success",
+			name: "Success text",
 			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) error {
 				m.EXPECT().
 					GetUserDataList(gomock.Any(), gomock.Any()).
@@ -533,6 +585,57 @@ func TestController_GetMetaDataList(t *testing.T) {
 						Items: []*smodel.GetUserDataListResponseItemModel{
 							{
 								DataType: "TEXT",
+							},
+						},
+					}, nil)
+
+				return nil
+			},
+			getJWT: createJWTString,
+		},
+		{
+			name: "Success binary",
+			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) error {
+				m.EXPECT().
+					GetUserDataList(gomock.Any(), gomock.Any()).
+					Return(&smodel.GetUserDataListResponseModel{
+						Items: []*smodel.GetUserDataListResponseItemModel{
+							{
+								DataType: "BINARY",
+							},
+						},
+					}, nil)
+
+				return nil
+			},
+			getJWT: createJWTString,
+		},
+		{
+			name: "Success credentials",
+			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) error {
+				m.EXPECT().
+					GetUserDataList(gomock.Any(), gomock.Any()).
+					Return(&smodel.GetUserDataListResponseModel{
+						Items: []*smodel.GetUserDataListResponseItemModel{
+							{
+								DataType: "CREDENTIALS",
+							},
+						},
+					}, nil)
+
+				return nil
+			},
+			getJWT: createJWTString,
+		},
+		{
+			name: "Success bank card",
+			prepare: func(m *mocks.MockStorager, mf *mocks.MockFileStorager) error {
+				m.EXPECT().
+					GetUserDataList(gomock.Any(), gomock.Any()).
+					Return(&smodel.GetUserDataListResponseModel{
+						Items: []*smodel.GetUserDataListResponseItemModel{
+							{
+								DataType: "BANK_CARD",
 							},
 						},
 					}, nil)

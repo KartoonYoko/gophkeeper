@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
+	"github.com/KartoonYoko/gophkeeper/internal/common/refreshtoken"
 	serror "github.com/KartoonYoko/gophkeeper/internal/storage/error/auth"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
-	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/common/jwtbuilder"
+	"github.com/KartoonYoko/gophkeeper/internal/usecase/common/jwtvalidator"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/auth"
 	"github.com/google/uuid"
 )
@@ -19,23 +20,19 @@ type Usecase struct {
 	Storage Storager
 	conf    Config
 
-	pswdHasher       *appcommon.SHA256PasswordHasher
-	secretkeyHandler *appcommon.SecretKeyHandler
+	pswdHasher       PasswordHasher
+	secretkeyHandler SecretKeyHandler
 }
 
-func New(storage Storager, config Config) (*Usecase, error) {
-	var err error
+func New(storage Storager, pswdHasher PasswordHasher, secretkeyHandler SecretKeyHandler, config Config) *Usecase {
 	uc := new(Usecase)
 
 	uc.conf = config
 	uc.Storage = storage
-	uc.pswdHasher = appcommon.NewSHA256PasswordHasher()
-	uc.secretkeyHandler, err = appcommon.NewSecretKeyHandler(uc.conf.SecretKeySecure)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create secret key handler: %v", err)
-	}
+	uc.pswdHasher = pswdHasher
+	uc.secretkeyHandler = secretkeyHandler
 
-	return uc, nil
+	return uc
 }
 
 func (uc *Usecase) Register(ctx context.Context, login string, password string) (*model.RegisterResponseModel, error) {
@@ -65,7 +62,7 @@ func (uc *Usecase) Register(ctx context.Context, login string, password string) 
 	}
 
 	// создаём токен обновления
-	rt, err := appcommon.GenerateRefreshToken()
+	rt, err := refreshtoken.Generate()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -114,7 +111,7 @@ func (uc *Usecase) Login(ctx context.Context, login string, password string) (*m
 	}
 
 	// создать рефреш токен
-	tokenID, err := uccommon.GenerateRefreshToken()
+	tokenID, err := refreshtoken.Generate()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -169,7 +166,7 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 		return nil, NewRefreshTokenExpiredError(refreshToken, tkn.ExpiredAt)
 	}
 
-	newTkn, err := uccommon.GenerateRefreshToken()
+	newTkn, err := refreshtoken.Generate()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -188,16 +185,16 @@ func (uc *Usecase) RefreshToken(ctx context.Context, refreshToken string) (*mode
 }
 
 func (uc *Usecase) BuildJWTString(userID string) (string, error) {
-	builder := uccommon.NewJWTStringBuilder(
+	builder := jwtbuilder.New(
 		uc.conf.SecretJWTKey,
-		uccommon.WithUserID(userID),
-		uccommon.WithTokeExpiredAtInMinute(uc.conf.JWTDurationMinute))
+		jwtbuilder.WithUserID(userID),
+		jwtbuilder.WithTokeExpiredAtInMinute(uc.conf.JWTDurationMinute))
 
 	return builder.BuildJWTString()
 }
 
 func (uc *Usecase) ValidateJWTString(token string) (string, error) {
-	validator := uccommon.NewJWTStringValidator(uc.conf.SecretJWTKey)
+	validator := jwtvalidator.NewJWTStringValidator(uc.conf.SecretJWTKey)
 
 	return validator.ValidateAndGetUserID(token)
 }

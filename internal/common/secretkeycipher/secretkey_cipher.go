@@ -1,4 +1,7 @@
-package common
+/*
+Package secretkeycipher реализует шифрование/дешифрование/создание секретного ключа пользователя
+*/
+package secretkeycipher
 
 import (
 	"crypto/aes"
@@ -8,8 +11,8 @@ import (
 	"encoding/hex"
 )
 
-// SecretKeyHandler реализует шифрование секретного ключа пользователя
-type SecretKeyHandler struct {
+// Handler реализует шифрование секретного ключа пользователя
+type Handler struct {
 	aeskey []byte
 	nonce  []byte
 
@@ -17,7 +20,7 @@ type SecretKeyHandler struct {
 	aesgcm   cipher.AEAD
 }
 
-func NewSecretKeyHandler(key string) (*SecretKeyHandler, error) {
+func New(key string) (*Handler, error) {
 	keysize := 2 * aes.BlockSize
 
 	aeskey := getSliceNFromString(key, keysize)
@@ -35,7 +38,7 @@ func NewSecretKeyHandler(key string) (*SecretKeyHandler, error) {
 	// todo: возможно ли использовать при шифровке/дешифровке каждый раз разный nonce?
 	nonce := getSliceNFromString(key, aesgcm.NonceSize())
 
-	h := new(SecretKeyHandler)
+	h := new(Handler)
 	h.aeskey = aeskey
 	h.nonce = nonce
 	h.aesblock = aesblock
@@ -45,13 +48,13 @@ func NewSecretKeyHandler(key string) (*SecretKeyHandler, error) {
 }
 
 // Encrypt шифрует секретный ключ
-func (h *SecretKeyHandler) Encrypt(secretkey string) (encryptedname string, err error) {
+func (h *Handler) Encrypt(secretkey string) (encryptedname string, err error) {
 	dst := h.aesgcm.Seal(nil, h.nonce, []byte(secretkey), nil)
 	return hex.EncodeToString(dst), nil
 }
 
 // Decrypt дешифрует секретный ключ
-func (h *SecretKeyHandler) Decrypt(encrypted string) (encryptedname string, err error) {
+func (h *Handler) Decrypt(encrypted string) (encryptedname string, err error) {
 	encd, err := hex.DecodeString(encrypted)
 	if err != nil {
 		return "", err
@@ -66,7 +69,7 @@ func (h *SecretKeyHandler) Decrypt(encrypted string) (encryptedname string, err 
 }
 
 // GenerateEncryptedSecretKey генерирует и шифрует секретный ключ
-func (h *SecretKeyHandler) GenerateEncryptedSecretKey() (string, error) {
+func (h *Handler) GenerateEncryptedSecretKey() (string, error) {
 	sc, err := generateSecretKey()
 	if err != nil {
 		return "", err

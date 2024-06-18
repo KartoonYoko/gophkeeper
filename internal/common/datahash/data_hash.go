@@ -1,4 +1,7 @@
-package common
+/*
+Package datahash реализует хеширование данных
+*/
+package datahash
 
 import "crypto/sha256"
 

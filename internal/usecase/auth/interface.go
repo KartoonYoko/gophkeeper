@@ -30,3 +30,14 @@ type Storager interface {
 
 	RemoveRefreshToken(ctx context.Context, userID string, tokenID string) error
 }
+
+type PasswordHasher interface {
+	Hash(password string) (string, error)
+	CheckHash(password, hash string) bool 	
+}
+
+type SecretKeyHandler interface {
+	Encrypt(secretkey string) (encryptedname string, err error)	
+	Decrypt(encrypted string) (encryptedname string, err error)
+	GenerateEncryptedSecretKey() (string, error)
+}

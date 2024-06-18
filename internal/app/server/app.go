@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/KartoonYoko/gophkeeper/internal/common/datacipher"
+	"github.com/KartoonYoko/gophkeeper/internal/common/passwordhash"
+	"github.com/KartoonYoko/gophkeeper/internal/common/secretkeycipher"
 	grpcserver "github.com/KartoonYoko/gophkeeper/internal/controller/grpcserver"
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	storageMinio "github.com/KartoonYoko/gophkeeper/internal/storage/miniostorage"
@@ -58,20 +61,23 @@ func Run() {
 		JWTDurationMinute:          config.JWTTokenLifetimeMinutes,
 		RefreshTokenDurationMinute: config.RefreshTokenLifeimeMinutes,
 	}
-	ucAuth, err := usecaseAuth.New(psSt, ucAConf)
+	sch, err := secretkeycipher.New(config.UserSecretKeySecure)
 	if err != nil {
-		logger.Log.Error("usecase auth init error", zap.Error(err))
+		logger.Log.Error("secret key cipher init error", zap.Error(err))
 		return
 	}
+	ph := passwordhash.New()
+	ucAuth := usecaseAuth.New(psSt, ph, sch, ucAConf)
 	sConf := usecaseStore.Config{
 		SecretKeySecure: config.UserSecretKeySecure,
 		DataSecretKey:   config.DataSecretKeySecure,
 	}
-	ucStore, err := usecaseStore.New(sConf, psSt, mstorage)
+	d, err := datacipher.New(config.DataSecretKeySecure)
 	if err != nil {
-		logger.Log.Error("usecase store init error", zap.Error(err))
+		logger.Log.Error("data cipher init error", zap.Error(err))
 		return
 	}
+	ucStore := usecaseStore.New(sConf, psSt, mstorage, d)
 
 	// server
 	grpcConf := grpcserver.Config{

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
 	sfmodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/filestore"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/store"
 	model "github.com/KartoonYoko/gophkeeper/internal/usecase/model/store"
@@ -14,26 +13,21 @@ type Usecase struct {
 	conf Config
 
 	// хранилище метаданных
-	Storage  Storager
+	Storage Storager
 	// хранилище данных
 	FileStorage FileStorager
 
-	dataCipherHandler *appcommon.DataCipherHandler
+	dataCipherHandler DataCipherHandler
 }
 
-func New(conf Config, storage Storager, fstorager FileStorager) (*Usecase, error) {
-	var err error
+func New(conf Config, storage Storager, fstorager FileStorager, dataCipherHandler DataCipherHandler) *Usecase {
 	uc := new(Usecase)
 
 	uc.Storage = storage
 	uc.FileStorage = fstorager
 	uc.conf = conf
-	uc.dataCipherHandler, err = appcommon.NewDataCipherHandler(conf.DataSecretKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create secret key handler: %w", err)
-	}
-
-	return uc, nil
+	uc.dataCipherHandler = dataCipherHandler
+	return uc
 }
 
 func (uc *Usecase) SaveData(ctx context.Context, request *model.SaveDataRequestModel) (*model.SaveDataResponseModel, error) {
@@ -154,8 +148,8 @@ func (uc *Usecase) UpdateData(ctx context.Context, request *model.UpdateDataRequ
 
 func (uc *Usecase) RemoveDataByID(ctx context.Context, request *model.RemoveDataByIDRequestModel) (*model.RemoveDataByIDResponseModel, error) {
 	err := uc.Storage.RemoveDataByID(ctx, &smodel.RemoveDataByIDRequestModel{
-		ID:     request.ID,
-		UserID: request.UserID,
+		ID:                    request.ID,
+		UserID:                request.UserID,
 		ModificationTimestamp: request.ModificationTimestamp,
 	})
 	if err != nil {

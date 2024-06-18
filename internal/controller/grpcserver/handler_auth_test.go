@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	appcommon "github.com/KartoonYoko/gophkeeper/internal/common"
+	"github.com/KartoonYoko/gophkeeper/internal/common/passwordhash"
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	serror "github.com/KartoonYoko/gophkeeper/internal/storage/error/auth"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/auth"
@@ -244,7 +244,7 @@ func TestController_Login(t *testing.T) {
 				password: "password",
 			},
 			prepare: func(m *mocks.MockStorager) error {
-				h := appcommon.NewSHA256PasswordHasher()
+				h := passwordhash.New()
 				hash, err := h.Hash("password")
 				if err != nil {
 					return err
@@ -321,7 +321,7 @@ func TestController_Login(t *testing.T) {
 				password: "password",
 			},
 			prepare: func(m *mocks.MockStorager) error {
-				h := appcommon.NewSHA256PasswordHasher()
+				h := passwordhash.New()
 				hash, err := h.Hash("password")
 				if err != nil {
 					return err

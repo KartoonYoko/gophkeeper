@@ -1,12 +1,15 @@
-package common
+/*
+Package secretkeycipher реализует шифрование/дешифрование данных
+*/
+package datacipher
 
 import (
 	"crypto/aes"
 	"crypto/cipher"
 )
 
-// DataCipherHandler реализует шифрование данных
-type DataCipherHandler struct {
+// Handler реализует шифрование данных
+type Handler struct {
 	aeskey []byte
 	nonce  []byte
 
@@ -14,8 +17,8 @@ type DataCipherHandler struct {
 	aesgcm   cipher.AEAD
 }
 
-// NewDataCipherHandler создает шифратор данных с указанным ключом
-func NewDataCipherHandler(key string) (*DataCipherHandler, error) {
+// New создает шифратор данных с указанным ключом
+func New(key string) (*Handler, error) {
 	keysize := 2 * aes.BlockSize
 
 	aeskey := make([]byte, keysize)
@@ -35,7 +38,7 @@ func NewDataCipherHandler(key string) (*DataCipherHandler, error) {
 	nonce := make([]byte, aesgcm.NonceSize())
 	copy([]byte(key), nonce)
 
-	h := new(DataCipherHandler)
+	h := new(Handler)
 	h.aeskey = aeskey
 	h.nonce = nonce
 	h.aesblock = aesblock
@@ -45,11 +48,11 @@ func NewDataCipherHandler(key string) (*DataCipherHandler, error) {
 }
 
 // Encrypt шифрует данные
-func (h *DataCipherHandler) Encrypt(data []byte) []byte {
+func (h *Handler) Encrypt(data []byte) []byte {
 	return h.aesgcm.Seal(nil, h.nonce, data, nil)
 }
 
 // Decrypt дешифрует данные
-func (h *DataCipherHandler) Decrypt(data []byte) (encryptedname []byte, err error) {
+func (h *Handler) Decrypt(data []byte) (encryptedname []byte, err error) {
 	return h.aesgcm.Open(nil, h.nonce, data, nil)
 }
