@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "github.com/KartoonYoko/gophkeeper/internal/proto";
+
+// StoreService сервис для хранения приватных данных
+service StoreService {
+    rpc SaveData (SaveDataRequest) returns (SaveDataResponse);
+    rpc UpdateData (UpdateDataRequest) returns (UpdateDataResponse);
+    rpc RemoveData (RemoveDataRequest) returns (RemoveDataResponse);
+    rpc GetDataByID (GetDataByIDRequest) returns (GetDataByIDResponse);
+
+    rpc GetMetaDataList(GetMetaDataListRequest) returns (GetMetaDataListResponse);
+}
+
+message RemoveDataRequest {
+    string id = 1;
+    int64 modification_timestamp = 2;
+}
+
+message RemoveDataResponse {}
+
+message UpdateDataRequest {
+    string id = 1;
+    string hash = 2;
+    int64 modification_timestamp = 3;
+    
+    bytes data = 4;
+}
+
+message UpdateDataResponse {}
+
+message GetMetaDataListRequest {}
+
+message GetMetaDataListResponse {
+    repeated GetMetaDataListItemResponse items = 1;
+}
+
+message GetMetaDataListItemResponse {
+    string id = 1;
+    string description = 2;
+    DataTypeEnum type = 3;
+    string hash = 4;
+    int64 modification_timestamp = 5;
+    bool is_deleted = 6;
+}
+
+message SaveDataRequest {
+    string id = 1;
+    string description = 2;
+    DataTypeEnum type = 3;
+    string hash = 4;
+    int64 modification_timestamp = 5;
+    
+    bytes data = 6;
+}
+
+message SaveDataResponse {
+    string data_id = 1;
+}
+
+enum DataTypeEnum {
+    DATA_TYPE_CREDENTIALS = 0;
+    DATA_TYPE_TEXT = 1;
+    DATA_TYPE_BINARY = 2;
+    DATA_TYPE_BANK_CARD = 3;
+}
+
+message GetDataByIDRequest {
+    string id = 1;
+}
+
+message GetDataByIDResponse {
+    DataTypeEnum type = 1;
+    string description = 2;
+    string hash = 3;
+    int64 modification_timestamp = 4;
+    
+    bytes data = 5;
+}
