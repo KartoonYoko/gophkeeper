@@ -1,6 +1,9 @@
 package cliclient
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	commondatatype "github.com/KartoonYoko/gophkeeper/internal/common/datatype"
+)
 
 func init() {
 	dataGetCmd.Flags().String("dataid", "", "Set data id that you want get")
@@ -41,28 +44,28 @@ var dataGetCmd = &cobra.Command{
 			return
 		}
 
-		if item.Datatype == "TEXT" {
+		if item.Datatype == commondatatype.DATATYPE_TEXT {
 			r, err := controller.ucstore.GetTextDataByID(ctx, dataid)
 			if err != nil {
 				cmd.PrintErrln(err)
 				return
 			}
 			cmd.Printf("Description: %s\nData: %s\n", r.Description, r.Text)
-		} else if item.Datatype == "BINARY" {
+		} else if item.Datatype == commondatatype.DATATYPE_BINARY {
 			r, err := controller.ucstore.GetBinaryDataByID(ctx, dataid)
 			if err != nil {
 				cmd.PrintErrln(err)
 				return
 			}
 			cmd.Printf("Description: %s\nData: %s\n", r.Description, r.Text)
-		} else if item.Datatype == "CREDENTIALS" {
+		} else if item.Datatype == commondatatype.DATATYPE_CREDENTIALS {
 			r, err := controller.ucstore.GetCredentialsDataByID(ctx, dataid)
 			if err != nil {
 				cmd.PrintErrln(err)
 				return
 			}
 			cmd.Printf("Description: %s\nLogin: %s\nPassword: %s\n", r.Description, r.Login, r.Password)
-		} else if item.Datatype == "BANK_CARD" {
+		} else if item.Datatype == commondatatype.DATATYPE_BANK_CARD {
 			r, err := controller.ucstore.GetBankCardDataByID(ctx, dataid)
 			if err != nil {
 				cmd.PrintErrln(err)

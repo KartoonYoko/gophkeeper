@@ -1,5 +1,7 @@
 package store
 
+import commondatatype "github.com/KartoonYoko/gophkeeper/internal/common/datatype"
+
 type SaveDataRequestModel struct {
 	ID                    string
 	UserID                string
@@ -52,13 +54,13 @@ type DataType string
 
 func (dt *DataType) IsValid() bool {
 	switch string(*dt) {
-	case "TEXT":
+	case commondatatype.DATATYPE_TEXT:
 		return true
-	case "CREDENTIALS":
+	case commondatatype.DATATYPE_CREDENTIALS:
 		return true
-	case "BANK_CARD":
+	case commondatatype.DATATYPE_BANK_CARD:
 		return true
-	case "BINARY":
+	case commondatatype.DATATYPE_BINARY:
 		return true
 	}
 

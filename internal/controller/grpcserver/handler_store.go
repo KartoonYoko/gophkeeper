@@ -7,6 +7,7 @@ import (
 	"github.com/KartoonYoko/gophkeeper/internal/logger"
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	ucmodel "github.com/KartoonYoko/gophkeeper/internal/usecase/model/store"
+	commondatatype "github.com/KartoonYoko/gophkeeper/internal/common/datatype"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -176,13 +177,13 @@ func getUsecaseDataTypeFromProtoDataType(dataType pb.DataTypeEnum) (ucmodel.Data
 
 func getProtoDataTypeFromUsecaseDataType(dataType string) (pb.DataTypeEnum, error) {
 	switch dataType {
-	case "TEXT":
+	case commondatatype.DATATYPE_TEXT:
 		return pb.DataTypeEnum_DATA_TYPE_TEXT, nil
-	case "BINARY":
+	case commondatatype.DATATYPE_BINARY:
 		return pb.DataTypeEnum_DATA_TYPE_BINARY, nil
-	case "BANK_CARD":
+	case commondatatype.DATATYPE_BANK_CARD:
 		return pb.DataTypeEnum_DATA_TYPE_BANK_CARD, nil
-	case "CREDENTIALS":
+	case commondatatype.DATATYPE_CREDENTIALS:
 		return pb.DataTypeEnum_DATA_TYPE_CREDENTIALS, nil
 	}
 

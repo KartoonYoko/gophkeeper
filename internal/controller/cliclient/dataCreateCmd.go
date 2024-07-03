@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	commondatatype "github.com/KartoonYoko/gophkeeper/internal/common/datatype"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/clientstore"
 	uccommon "github.com/KartoonYoko/gophkeeper/internal/usecase/common/cliclient"
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ var dataCreateCmd = &cobra.Command{
 		}
 
 		msg := ""
-		if dt == "TEXT" {
+		if dt == commondatatype.DATATYPE_TEXT {
 			pc := promptContent{
 				errorMsg: "Please, enter text",
 				label:    "Enter text",
@@ -61,7 +62,7 @@ var dataCreateCmd = &cobra.Command{
 			}
 			err = controller.ucstore.CreateTextData(ctx, text, description)
 			msg = "Text data created"
-		} else if dt == "BINARY" {
+		} else if dt == commondatatype.DATATYPE_BINARY {
 			pc := promptContent{
 				errorMsg: "Please, enter file name",
 				label:    "Enter file name",
@@ -74,7 +75,7 @@ var dataCreateCmd = &cobra.Command{
 			}
 			err = controller.ucstore.CreateBinaryData(ctx, filename, description)
 			msg = "Binary data created"
-		} else if dt == "CREDENTIALS" {
+		} else if dt == commondatatype.DATATYPE_CREDENTIALS {
 			pc := promptContent{
 				errorMsg: "Please, enter login",
 				label:    "Enter login",
@@ -100,7 +101,7 @@ var dataCreateCmd = &cobra.Command{
 				Password: password,
 			}, description)
 			msg = "Credentials created"
-		} else if dt == "BANK_CARD" {
+		} else if dt == commondatatype.DATATYPE_BANK_CARD {
 			var cardnumber, cvv string
 			var pc promptContent
 			pc = promptContent{
@@ -146,10 +147,10 @@ var dataCreateCmd = &cobra.Command{
 
 func (dt *dataType) isValid() bool {
 	updt := strings.ToUpper(string(*dt))
-	if updt == "TEXT" ||
-		updt == "CREDENTIALS" ||
-		updt == "BANK_CARD" ||
-		updt == "BINARY" {
+	if updt == commondatatype.DATATYPE_TEXT ||
+		updt == commondatatype.DATATYPE_CREDENTIALS ||
+		updt == commondatatype.DATATYPE_BANK_CARD ||
+		updt == commondatatype.DATATYPE_BINARY {
 		return true
 	}
 

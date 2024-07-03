@@ -7,6 +7,7 @@ import (
 
 	pb "github.com/KartoonYoko/gophkeeper/internal/proto"
 	sfmodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/filestore"
+	commondatatype "github.com/KartoonYoko/gophkeeper/internal/common/datatype"
 	smodel "github.com/KartoonYoko/gophkeeper/internal/storage/model/store"
 	"github.com/KartoonYoko/gophkeeper/internal/usecase/store/mocks"
 	"github.com/stretchr/testify/require"
@@ -218,7 +219,7 @@ func TestController_GetDataByID(t *testing.T) {
 				m.EXPECT().
 					GetDataByID(gomock.Any(), gomock.Any()).
 					Return(&smodel.GetDataByIDResponseModel{
-						DataType: "TEXT",
+						DataType: commondatatype.DATATYPE_TEXT,
 					}, nil)
 				mf.EXPECT().
 					GetDataByID(gomock.Any(), gomock.Any()).
@@ -584,7 +585,7 @@ func TestController_GetMetaDataList(t *testing.T) {
 					Return(&smodel.GetUserDataListResponseModel{
 						Items: []*smodel.GetUserDataListResponseItemModel{
 							{
-								DataType: "TEXT",
+								DataType: commondatatype.DATATYPE_TEXT,
 							},
 						},
 					}, nil)
